@@ -193,3 +193,60 @@ main {
 .medicine-card.low-stock {
     border-color: var(--low-stock-color);
 }
+
+/* Grouping Styles */
+.group-section {
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+}
+
+.group-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--card-border);
+    color: var(--primary-color);
+}
+
+.group-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 600px) {
+    .group-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
+
+/* Updated Stock Controls */
+.stock-controls-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    background-color: var(--bg-color);
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.stock-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shop-label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+}
+
+.total-stock {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    text-align: right;
+    font-weight: bold;
+    color: var(--text-color);
+}

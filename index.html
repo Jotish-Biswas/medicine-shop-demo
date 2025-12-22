@@ -21,6 +21,13 @@
         <div class="search-container">
             <input type="text" id="search-bar" placeholder="Search medicine..." data-i18n="search_placeholder">
         </div>
+        <div class="filter-container" style="margin-top: 10px;">
+            <select id="group-by" style="width: 100%; padding: 0.8rem; border: 1px solid var(--card-border); border-radius: 8px; background-color: var(--card-bg); color: var(--text-color); font-size: 1rem;">
+                <option value="none">No Grouping</option>
+                <option value="company">Group by Company</option>
+                <option value="form">Group by Type</option>
+            </select>
+        </div>
     </header>
 
     <main id="medicine-list">
