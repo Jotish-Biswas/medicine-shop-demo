@@ -1,0 +1,195 @@
+:root {
+    --bg-color: #fdfbf7;
+    --text-color: #1a1a1a;
+    --card-bg: #ffffff;
+    --card-border: #e0e0e0;
+    --primary-color: #2c3e50;
+    --accent-color: #e74c3c;
+    --low-stock-color: #c0392b;
+    --low-stock-bg: #fadbd8;
+    --shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --card-border: #333333;
+    --primary-color: #ecf0f1;
+    --low-stock-bg: #3e1a1a;
+    --shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    padding-bottom: 80px;
+}
+
+header {
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color);
+    padding: 1rem;
+    border-bottom: 1px solid var(--card-border);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+button {
+    background: none;
+    border: 1px solid var(--card-border);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+button.active {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.search-container {
+    width: 100%;
+}
+
+#search-bar {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+main {
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 600px) {
+    main {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
+
+.medicine-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.medicine-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.medicine-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.medicine-form {
+    font-size: 0.8rem;
+    background-color: var(--card-border);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    color: var(--text-color);
+}
+
+.medicine-company {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.medicine-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.price {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.stock-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stock-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    padding: 0;
+}
+
+.stock-count {
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+}
+
+.low-stock-indicator {
+    display: none;
+    font-size: 0.8rem;
+    color: var(--low-stock-color);
+    background-color: var(--low-stock-bg);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.medicine-card.low-stock .low-stock-indicator {
+    display: block;
+}
+
+.medicine-card.low-stock {
+    border-color: var(--low-stock-color);
+}

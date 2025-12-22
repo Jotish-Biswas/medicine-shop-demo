@@ -1,0 +1,12 @@
+{
+    "app_title": "Medicine Shop",
+    "search_placeholder": "Search medicine...",
+    "stock_label": "Stock:",
+    "price_label": "Price:",
+    "low_stock": "Low Stock",
+    "add_stock": "Add",
+    "remove_stock": "Remove",
+    "toggle_theme": "Toggle Theme",
+    "lang_en": "EN",
+    "lang_bn": "বাংলা"
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Shop Inventory</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-top">
+            <h1 data-i18n="app_title">Medicine Shop</h1>
+            <div class="controls">
+                <button class="lang-btn active" data-lang="en" data-i18n="lang_en">EN</button>
+                <button class="lang-btn" data-lang="bn" data-i18n="lang_bn">বাংলা</button>
+                <button id="theme-toggle" aria-label="Toggle Theme">
+                    <span data-i18n="toggle_theme">Toggle Theme</span>
+                </button>
+            </div>
+        </div>
+        <div class="search-container">
+            <input type="text" id="search-bar" placeholder="Search medicine..." data-i18n="search_placeholder">
+        </div>
+    </header>
+
+    <main id="medicine-list">
+        <!-- Medicine cards will be injected here by JS -->
+    </main>
+
+    <script src="js/lang.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+    "app_title": "ঔষধের দোকান",
+    "search_placeholder": "ঔষধ খুঁজুন...",
+    "stock_label": "মজুদ:",
+    "price_label": "দাম:",
+    "low_stock": "স্বল্প মজুদ",
+    "add_stock": "যোগ করুন",
+    "remove_stock": "কমান",
+    "toggle_theme": "থিম পরিবর্তন",
+    "lang_en": "EN",
+    "lang_bn": "বাংলা"
+}
