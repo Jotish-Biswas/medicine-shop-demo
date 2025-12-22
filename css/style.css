@@ -347,3 +347,131 @@ input[type="number"] {
 .secondary-btn:hover {
     background-color: var(--card-border);
 }
+/* Accessibility & New Features */
+
+/* Larger Fonts */
+body {
+    font-size: 18px; /* Increased base font size */
+}
+
+h1 {
+    font-size: 2rem;
+}
+
+.medicine-name {
+    font-size: 1.4rem;
+}
+
+.price {
+    font-size: 1.3rem;
+}
+
+/* Larger Buttons */
+button {
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+}
+
+.stock-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.stock-btn.plus {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-color: #c8e6c9;
+}
+
+.stock-btn.minus {
+    background-color: #ffebee;
+    color: #c62828;
+    border-color: #ffcdd2;
+}
+
+/* Stock Input */
+.stock-input {
+    width: 60px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 0.4rem;
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Alerts Badge */
+.icon-btn {
+    position: relative;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    border: none;
+}
+
+.badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--accent-color);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background-color: var(--bg-color);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Alerts List */
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.alert-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem;
+    background-color: var(--low-stock-bg);
+    border-radius: 6px;
+    color: var(--low-stock-color);
+    font-weight: 500;
+}

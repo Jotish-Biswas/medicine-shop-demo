@@ -20,5 +20,12 @@
     "label_stock_g2": "মজুদ (G2)",
     "label_stock_g3": "মজুদ (G3)",
     "btn_add": "যোগ করুন",
-    "btn_cancel": "বাতিল"
+    "btn_cancel": "বাতিল",
+    "alerts_title": "স্বল্প মজুদ সতর্কতা",
+    "stats_title": "পরিসংখ্যান",
+    "stat_daily_in": "আজকের জমা",
+    "stat_daily_out": "আজকের বিক্রি",
+    "stat_monthly_in": "মাসিক জমা",
+    "stat_monthly_out": "মাসিক বিক্রি",
+    "btn_close": "বন্ধ করুন"
 }

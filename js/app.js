@@ -29,6 +29,47 @@ const medicines = [
     { id: 7, name: 'Tygacil', company: 'Beximco', form: 'Injection', price: '500.00', stock: { main: 10, g1: 2, g2: 0, g3: 1 }, lowStockThreshold: 5 },
 ];
 
+// Transaction History (Simulated)
+let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+function logTransaction(type, quantity) {
+    const transaction = {
+        type: type, // 'in' or 'out'
+        quantity: quantity,
+        date: new Date().toISOString()
+    };
+    transactions.push(transaction);
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+}
+
+function getStats() {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    let dailyIn = 0, dailyOut = 0, monthlyIn = 0, monthlyOut = 0;
+
+    transactions.forEach(t => {
+        const tDate = new Date(t.date);
+        const tDateString = tDate.toISOString().split('T')[0];
+        
+        // Daily Stats
+        if (tDateString === today) {
+            if (t.type === 'in') dailyIn += t.quantity;
+            if (t.type === 'out') dailyOut += t.quantity;
+        }
+
+        // Monthly Stats
+        if (tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear) {
+            if (t.type === 'in') monthlyIn += t.quantity;
+            if (t.type === 'out') monthlyOut += t.quantity;
+        }
+    });
+
+    return { dailyIn, dailyOut, monthlyIn, monthlyOut };
+}
+
 const medicineContainer = document.getElementById('medicine-list');
 const groupBySelect = document.getElementById('group-by');
 const searchBar = document.getElementById('search-bar');
@@ -39,8 +80,29 @@ const addItemModal = document.getElementById('add-item-modal');
 const cancelBtn = document.getElementById('cancel-btn');
 const addItemForm = document.getElementById('add-item-form');
 
+// Alert & Stats Elements
+const alertBtn = document.getElementById('alert-btn');
+const alertBadge = document.getElementById('alert-badge');
+const alertsModal = document.getElementById('alerts-modal');
+const alertsList = document.getElementById('alerts-list');
+const closeAlertsBtn = document.getElementById('close-alerts-btn');
+
+const statsBtn = document.getElementById('stats-btn');
+const statsModal = document.getElementById('stats-modal');
+const closeStatsBtn = document.getElementById('close-stats-btn');
+
 function getTotalStock(med) {
     return med.stock.main + med.stock.g1 + med.stock.g2 + med.stock.g3;
+}
+
+function updateAlertBadge() {
+    const lowStockCount = medicines.filter(m => getTotalStock(m) <= m.lowStockThreshold).length;
+    alertBadge.textContent = lowStockCount;
+    if (lowStockCount > 0) {
+        alertBadge.style.display = 'flex';
+    } else {
+        alertBadge.style.display = 'none';
+    }
 }
 
 function createMedicineCard(med) {
@@ -62,7 +124,7 @@ function createMedicineCard(med) {
                     <span class="shop-label">Main Store</span>
                     <div class="stock-control">
                         <button class="stock-btn minus" data-id="${med.id}" data-shop="main">-</button>
-                        <span class="stock-count">${med.stock.main}</span>
+                        <input type="number" class="stock-input" data-id="${med.id}" data-shop="main" value="${med.stock.main}" min="0">
                         <button class="stock-btn plus" data-id="${med.id}" data-shop="main">+</button>
                     </div>
                 </div>
@@ -70,7 +132,7 @@ function createMedicineCard(med) {
                     <span class="shop-label">G1</span>
                     <div class="stock-control">
                         <button class="stock-btn minus" data-id="${med.id}" data-shop="g1">-</button>
-                        <span class="stock-count">${med.stock.g1}</span>
+                        <input type="number" class="stock-input" data-id="${med.id}" data-shop="g1" value="${med.stock.g1}" min="0">
                         <button class="stock-btn plus" data-id="${med.id}" data-shop="g1">+</button>
                     </div>
                 </div>
@@ -78,7 +140,7 @@ function createMedicineCard(med) {
                     <span class="shop-label">G2</span>
                     <div class="stock-control">
                         <button class="stock-btn minus" data-id="${med.id}" data-shop="g2">-</button>
-                        <span class="stock-count">${med.stock.g2}</span>
+                        <input type="number" class="stock-input" data-id="${med.id}" data-shop="g2" value="${med.stock.g2}" min="0">
                         <button class="stock-btn plus" data-id="${med.id}" data-shop="g2">+</button>
                     </div>
                 </div>
@@ -86,7 +148,7 @@ function createMedicineCard(med) {
                     <span class="shop-label">G3</span>
                     <div class="stock-control">
                         <button class="stock-btn minus" data-id="${med.id}" data-shop="g3">-</button>
-                        <span class="stock-count">${med.stock.g3}</span>
+                        <input type="number" class="stock-input" data-id="${med.id}" data-shop="g3" value="${med.stock.g3}" min="0">
                         <button class="stock-btn plus" data-id="${med.id}" data-shop="g3">+</button>
                     </div>
                 </div>
@@ -144,6 +206,7 @@ function renderMedicines() {
     if (typeof updateText === 'function') {
         updateText();
     }
+    updateAlertBadge();
 }
 
 // Initial Render
@@ -169,9 +232,34 @@ medicineContainer.addEventListener('click', (e) => {
         if (med && shop) {
             if (e.target.classList.contains('plus')) {
                 med.stock[shop]++;
+                logTransaction('in', 1);
             } else if (e.target.classList.contains('minus')) {
-                if (med.stock[shop] > 0) med.stock[shop]--;
+                if (med.stock[shop] > 0) {
+                    med.stock[shop]--;
+                    logTransaction('out', 1);
+                }
             }
+            renderMedicines();
+        }
+    }
+});
+
+// Manual Stock Input
+medicineContainer.addEventListener('change', (e) => {
+    if (e.target.classList.contains('stock-input')) {
+        const id = parseInt(e.target.dataset.id);
+        const shop = e.target.dataset.shop;
+        const med = medicines.find(m => m.id === id);
+        const newStock = parseInt(e.target.value);
+
+        if (med && shop && !isNaN(newStock) && newStock >= 0) {
+            const diff = newStock - med.stock[shop];
+            if (diff > 0) {
+                logTransaction('in', diff);
+            } else if (diff < 0) {
+                logTransaction('out', Math.abs(diff));
+            }
+            med.stock[shop] = newStock;
             renderMedicines();
         }
     }
@@ -187,12 +275,46 @@ cancelBtn.addEventListener('click', () => {
     addItemForm.reset();
 });
 
+// Alert Modal Logic
+alertBtn.addEventListener('click', () => {
+    const lowStockMeds = medicines.filter(m => getTotalStock(m) <= m.lowStockThreshold);
+    alertsList.innerHTML = '';
+    if (lowStockMeds.length === 0) {
+        alertsList.innerHTML = '<p>No low stock items.</p>';
+    } else {
+        lowStockMeds.forEach(med => {
+            const div = document.createElement('div');
+            div.className = 'alert-item';
+            div.innerHTML = `<span>${med.name} (${med.company})</span> <span>Stock: ${getTotalStock(med)}</span>`;
+            alertsList.appendChild(div);
+        });
+    }
+    alertsModal.classList.add('show');
+});
+
+closeAlertsBtn.addEventListener('click', () => {
+    alertsModal.classList.remove('show');
+});
+
+// Stats Modal Logic
+statsBtn.addEventListener('click', () => {
+    const stats = getStats();
+    document.getElementById('stat-daily-in').textContent = stats.dailyIn;
+    document.getElementById('stat-daily-out').textContent = stats.dailyOut;
+    document.getElementById('stat-monthly-in').textContent = stats.monthlyIn;
+    document.getElementById('stat-monthly-out').textContent = stats.monthlyOut;
+    statsModal.classList.add('show');
+});
+
+closeStatsBtn.addEventListener('click', () => {
+    statsModal.classList.remove('show');
+});
+
 // Close modal when clicking outside
 window.addEventListener('click', (e) => {
-    if (e.target === addItemModal) {
-        addItemModal.classList.remove('show');
-        addItemForm.reset();
-    }
+    if (e.target === addItemModal) addItemModal.classList.remove('show');
+    if (e.target === alertsModal) alertsModal.classList.remove('show');
+    if (e.target === statsModal) statsModal.classList.remove('show');
 });
 
 // Handle Form Submission
@@ -226,6 +348,13 @@ addItemForm.addEventListener('submit', (e) => {
     };
 
     medicines.push(newMedicine);
+    
+    // Log initial stock as 'in'
+    const totalInitialStock = stockMain + stockG1 + stockG2 + stockG3;
+    if (totalInitialStock > 0) {
+        logTransaction('in', totalInitialStock);
+    }
+
     renderMedicines();
     
     addItemModal.classList.remove('show');

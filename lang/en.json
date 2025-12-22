@@ -20,5 +20,12 @@
     "label_stock_g2": "Stock (G2)",
     "label_stock_g3": "Stock (G3)",
     "btn_add": "Add Medicine",
-    "btn_cancel": "Cancel"
+    "btn_cancel": "Cancel",
+    "alerts_title": "Low Stock Alerts",
+    "stats_title": "Statistics",
+    "stat_daily_in": "Daily In",
+    "stat_daily_out": "Daily Out",
+    "stat_monthly_in": "Monthly In",
+    "stat_monthly_out": "Monthly Out",
+    "btn_close": "Close"
 }
