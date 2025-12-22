@@ -8,5 +8,17 @@
     "remove_stock": "Remove",
     "toggle_theme": "Toggle Theme",
     "lang_en": "EN",
-    "lang_bn": "বাংলা"
+    "lang_bn": "বাংলা",
+    "add_item_btn": "Add New Item",
+    "modal_title": "Add New Medicine",
+    "label_name": "Medicine Name",
+    "label_company": "Company",
+    "label_type": "Type (Tablet, Syrup, etc.)",
+    "label_price": "Price",
+    "label_stock_main": "Stock (Main Store)",
+    "label_stock_g1": "Stock (G1)",
+    "label_stock_g2": "Stock (G2)",
+    "label_stock_g3": "Stock (G3)",
+    "btn_add": "Add Medicine",
+    "btn_cancel": "Cancel"
 }

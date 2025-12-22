@@ -8,5 +8,17 @@
     "remove_stock": "কমান",
     "toggle_theme": "থিম পরিবর্তন",
     "lang_en": "EN",
-    "lang_bn": "বাংলা"
+    "lang_bn": "বাংলা",
+    "add_item_btn": "নতুন ঔষধ যোগ করুন",
+    "modal_title": "নতুন ঔষধ যোগ করুন",
+    "label_name": "ঔষধের নাম",
+    "label_company": "কোম্পানি",
+    "label_type": "ধরন (ট্যাবলেট, সিরাপ, ইত্যাদি)",
+    "label_price": "দাম",
+    "label_stock_main": "মজুদ (মেইন স্টোর)",
+    "label_stock_g1": "মজুদ (G1)",
+    "label_stock_g2": "মজুদ (G2)",
+    "label_stock_g3": "মজুদ (G3)",
+    "btn_add": "যোগ করুন",
+    "btn_cancel": "বাতিল"
 }
