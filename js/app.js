@@ -145,6 +145,20 @@ function renderMedicines() {
         updateText();
     }
 }
+
+// Initial Render
+renderMedicines();
+
+// Search Functionality
+searchBar.addEventListener('input', () => {
+    renderMedicines();
+});
+
+// Group By Functionality
+groupBySelect.addEventListener('change', () => {
+    renderMedicines();
+});
+
 // Stock Interaction (Delegation)
 medicineContainer.addEventListener('click', (e) => {
     if (e.target.classList.contains('stock-btn')) {
