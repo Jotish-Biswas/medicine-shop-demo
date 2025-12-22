@@ -32,10 +32,11 @@ const medicines = [
 // Transaction History (Simulated)
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
-function logTransaction(type, quantity) {
+function logTransaction(type, quantity, price) {
     const transaction = {
         type: type, // 'in' or 'out'
         quantity: quantity,
+        price: parseFloat(price),
         date: new Date().toISOString()
     };
     transactions.push(transaction);
@@ -49,25 +50,45 @@ function getStats() {
     const currentYear = now.getFullYear();
 
     let dailyIn = 0, dailyOut = 0, monthlyIn = 0, monthlyOut = 0;
+    let dailyPurchase = 0, dailySales = 0, monthlyPurchase = 0, monthlySales = 0;
 
     transactions.forEach(t => {
         const tDate = new Date(t.date);
         const tDateString = tDate.toISOString().split('T')[0];
+        const value = t.quantity * (t.price || 0);
         
         // Daily Stats
         if (tDateString === today) {
-            if (t.type === 'in') dailyIn += t.quantity;
-            if (t.type === 'out') dailyOut += t.quantity;
+            if (t.type === 'in') {
+                dailyIn += t.quantity;
+                dailyPurchase += value;
+            }
+            if (t.type === 'out') {
+                dailyOut += t.quantity;
+                dailySales += value;
+            }
         }
 
         // Monthly Stats
         if (tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear) {
-            if (t.type === 'in') monthlyIn += t.quantity;
-            if (t.type === 'out') monthlyOut += t.quantity;
+            if (t.type === 'in') {
+                monthlyIn += t.quantity;
+                monthlyPurchase += value;
+            }
+            if (t.type === 'out') {
+                monthlyOut += t.quantity;
+                monthlySales += value;
+            }
         }
     });
 
-    return { dailyIn, dailyOut, monthlyIn, monthlyOut };
+    return { 
+        dailyIn, dailyOut, monthlyIn, monthlyOut,
+        dailyPurchase: dailyPurchase.toFixed(2),
+        dailySales: dailySales.toFixed(2),
+        monthlyPurchase: monthlyPurchase.toFixed(2),
+        monthlySales: monthlySales.toFixed(2)
+    };
 }
 
 const medicineContainer = document.getElementById('medicine-list');
@@ -232,11 +253,11 @@ medicineContainer.addEventListener('click', (e) => {
         if (med && shop) {
             if (e.target.classList.contains('plus')) {
                 med.stock[shop]++;
-                logTransaction('in', 1);
+                logTransaction('in', 1, med.price);
             } else if (e.target.classList.contains('minus')) {
                 if (med.stock[shop] > 0) {
                     med.stock[shop]--;
-                    logTransaction('out', 1);
+                    logTransaction('out', 1, med.price);
                 }
             }
             renderMedicines();
@@ -255,9 +276,9 @@ medicineContainer.addEventListener('change', (e) => {
         if (med && shop && !isNaN(newStock) && newStock >= 0) {
             const diff = newStock - med.stock[shop];
             if (diff > 0) {
-                logTransaction('in', diff);
+                logTransaction('in', diff, med.price);
             } else if (diff < 0) {
-                logTransaction('out', Math.abs(diff));
+                logTransaction('out', Math.abs(diff), med.price);
             }
             med.stock[shop] = newStock;
             renderMedicines();
@@ -303,6 +324,12 @@ statsBtn.addEventListener('click', () => {
     document.getElementById('stat-daily-out').textContent = stats.dailyOut;
     document.getElementById('stat-monthly-in').textContent = stats.monthlyIn;
     document.getElementById('stat-monthly-out').textContent = stats.monthlyOut;
+    
+    document.getElementById('stat-daily-purchase').textContent = stats.dailyPurchase;
+    document.getElementById('stat-daily-sales').textContent = stats.dailySales;
+    document.getElementById('stat-monthly-purchase').textContent = stats.monthlyPurchase;
+    document.getElementById('stat-monthly-sales').textContent = stats.monthlySales;
+    
     statsModal.classList.add('show');
 });
 
@@ -352,7 +379,7 @@ addItemForm.addEventListener('submit', (e) => {
     // Log initial stock as 'in'
     const totalInitialStock = stockMain + stockG1 + stockG2 + stockG3;
     if (totalInitialStock > 0) {
-        logTransaction('in', totalInitialStock);
+        logTransaction('in', totalInitialStock, price);
     }
 
     renderMedicines();

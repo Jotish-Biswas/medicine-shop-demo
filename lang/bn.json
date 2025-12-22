@@ -27,5 +27,9 @@
     "stat_daily_out": "আজকের বিক্রি",
     "stat_monthly_in": "মাসিক জমা",
     "stat_monthly_out": "মাসিক বিক্রি",
+    "stat_daily_purchase": "আজকের কেনা (৳)",
+    "stat_daily_sales": "আজকের বিক্রি (৳)",
+    "stat_monthly_purchase": "মাসিক কেনা (৳)",
+    "stat_monthly_sales": "মাসিক বিক্রি (৳)",
     "btn_close": "বন্ধ করুন"
 }

@@ -34,6 +34,13 @@
                 <option value="company">Group by Company</option>
                 <option value="form">Group by Type</option>
             </select>
+        </div>
+    </header>
+
+    <main id="medicine-list">
+        <!-- Medicine cards will be injected here by JS -->
+    </main>
+
     <!-- Add Item Modal -->
     <div id="add-item-modal" class="modal">
         <div class="modal-content">
@@ -113,9 +120,25 @@
                     <h3 data-i18n="stat_monthly_in">Monthly In</h3>
                     <p id="stat-monthly-in" class="stat-value">0</p>
                 </div>
-                <div class="stat-card">
+                                <div class="stat-card">
                     <h3 data-i18n="stat_monthly_out">Monthly Out</h3>
                     <p id="stat-monthly-out" class="stat-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3 data-i18n="stat_daily_purchase">Daily Purchase (৳)</h3>
+                    <p id="stat-daily-purchase" class="stat-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3 data-i18n="stat_daily_sales">Daily Sales (৳)</h3>
+                    <p id="stat-daily-sales" class="stat-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3 data-i18n="stat_monthly_purchase">Monthly Purchase (৳)</h3>
+                    <p id="stat-monthly-purchase" class="stat-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3 data-i18n="stat_monthly_sales">Monthly Sales (৳)</h3>
+                    <p id="stat-monthly-sales" class="stat-value">0</p>
                 </div>
             </div>
             <div class="form-actions">
@@ -124,10 +147,14 @@
         </div>
     </div>
 
-    <script src="js/lang.js"></script>it" class="primary-btn" data-i18n="btn_add">Add Medicine</button>
-                </div>
-            </form>
-        </div>
+    <script src="js/lang.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+    <script src="js/lang.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> </div>
     </div>
 
     <script src="js/lang.js"></script>

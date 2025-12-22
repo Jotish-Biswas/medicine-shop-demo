@@ -27,5 +27,9 @@
     "stat_daily_out": "Daily Out",
     "stat_monthly_in": "Monthly In",
     "stat_monthly_out": "Monthly Out",
+    "stat_daily_purchase": "Daily Purchase (৳)",
+    "stat_daily_sales": "Daily Sales (৳)",
+    "stat_monthly_purchase": "Monthly Purchase (৳)",
+    "stat_monthly_sales": "Monthly Sales (৳)",
     "btn_close": "Close"
 }
