@@ -160,6 +160,7 @@ function renderTableHeaders() {
         <th data-i18n="table_name">Name</th>
         <th data-i18n="table_company">Company</th>
         <th data-i18n="table_price">Price (৳)</th>
+        <th>Total Stock</th>
     `;
 
     shops.forEach(shop => {
@@ -204,6 +205,7 @@ function createMedicineRow(medicine) {
             <td>
                 <input type="number" class="price-input" data-id="${medicine.id}" value="${medicine.price}" step="0.01" style="width: 120px; padding: 4px; border: 1px solid var(--card-border); border-radius: 4px; text-align: center;">
             </td>
+            <td style="font-weight: bold; text-align: center;">${totalStock}</td>
             ${shopCells}
         </tr>
     `;
@@ -313,16 +315,25 @@ medicineTableBody.addEventListener('click', (e) => {
         const med = medicines.find(m => m.id === id);
         
         if (med && shop) {
-            if (e.target.classList.contains('plus')) {
-                med.stock[shop]++;
-                logTransaction('in', 1, med.price, shop, med.name);
-            } else if (e.target.classList.contains('minus')) {
-                if (med.stock[shop] > 0) {
-                    med.stock[shop]--;
-                    logTransaction('out', 1, med.price, shop, med.name);
+            const amountStr = prompt("Enter amount to add/subtract:", "1");
+            const amount = parseInt(amountStr);
+
+            if (!isNaN(amount) && amount > 0) {
+                if (e.target.classList.contains('plus')) {
+                    med.stock[shop] = (med.stock[shop] || 0) + amount;
+                    logTransaction('in', amount, med.price, shop, med.name);
+                } else if (e.target.classList.contains('minus')) {
+                    if (med.stock[shop] >= amount) {
+                        med.stock[shop] -= amount;
+                        logTransaction('out', amount, med.price, shop, med.name);
+                    } else {
+                        alert("Not enough stock to subtract.");
+                    }
                 }
+                renderMedicines();
+            } else if (amountStr !== null) { // Don't alert if user cancelled prompt
+                alert("Please enter a valid positive number.");
             }
-            renderMedicines();
         }
     }
 });

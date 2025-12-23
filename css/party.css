@@ -1,0 +1,55 @@
+/* Debtor/Creditor Styles */
+.party-modal-content {
+    max-width: 1200px;
+}
+
+.party-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.party-item {
+    display: grid;
+    grid-template-columns: 3fr 1.5fr 1.5fr 1.5fr 1fr 1.5fr; /* Adjusted for 6 columns */
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    gap: 1rem; /* Add gap for spacing */
+}
+
+/* Align numeric columns to the right */
+.party-item span:nth-child(2),
+.party-item span:nth-child(3),
+.party-item span:nth-child(4) {
+    text-align: right;
+}
+
+.party-item:last-child {
+    border-bottom: none;
+}
+
+.party-item:hover {
+    background-color: var(--table-row-hover);
+}
+
+.party-header {
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: var(--table-header-bg);
+}
+
+.date-filter-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.date-filter-group select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--card-border);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}

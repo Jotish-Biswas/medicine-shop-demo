@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medicine Shop Inventory</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/party.css">
 </head>
 <body>
     <header>
@@ -14,6 +15,12 @@
                 <button id="alert-btn" class="icon-btn" aria-label="Alerts" style="width: auto; padding-right: 1rem;">
                     ⚠️ <span style="margin-left: 0.5rem; font-size: 0.9rem;">Alerts (সতর্কতা)</span>
                     <span id="alert-badge" class="badge">0</span>
+                </button>
+                <button id="debtor-btn" class="icon-btn" aria-label="Debtors" style="width: auto; padding-right: 1rem;">
+                    Debtors
+                </button>
+                <button id="creditor-btn" class="icon-btn" aria-label="Creditors" style="width: auto; padding-right: 1rem;">
+                    Creditors
                 </button>
                 <button id="stats-btn" class="icon-btn" aria-label="Statistics" style="width: auto; padding-right: 1rem;">
                     📊 <span style="margin-left: 0.5rem; font-size: 0.9rem;">Statistics (পরিসংখ্যান)</span>
@@ -280,10 +287,96 @@
         </div>
     </div>
 
+    <!-- Debtor/Creditor Modal -->
+    <div id="party-modal" class="modal">
+        <div class="modal-content party-modal-content">
+            <div class="stats-controls" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
+                <h3 style="margin-right: auto; font-size: 1.1rem;" id="party-modal-title">Debtors</h3>
+                
+                <div class="date-filter-group">
+                    <!-- Month Dropdown -->
+                    <select id="party-month-dropdown">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+
+                    <!-- Year Dropdown -->
+                    <select id="party-year-dropdown">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+
+                <button id="add-party-transaction-btn" class="primary-btn">Add New Transaction</button>
+            </div>
+            <div class="party-list">
+                <div class="party-item party-header">
+                    <span>Party Name</span>
+                    <span>Total Due</span>
+                    <span>Paid Amount</span>
+                    <span>Present Due</span>
+                    <span>Type</span>
+                    <span>Date</span>
+                </div>
+                <div id="party-list-body">
+                    <!-- Party transactions will be injected here -->
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="close-party-modal-btn" class="secondary-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Party Transaction Modal -->
+    <div id="add-party-transaction-modal" class="modal">
+        <div class="modal-content">
+            <h2>Add Party Transaction</h2>
+            <form id="add-party-transaction-form">
+                <div class="form-group">
+                    <label for="party-name">Party Name</label>
+                    <input type="text" id="party-name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="party-due">Total Due</label>
+                        <input type="number" id="party-due" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="party-paid">Paid Amount</label>
+                        <input type="number" id="party-paid" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="party-type">Type</label>
+                    <select id="party-type">
+                        <option value="cash">Cash</option>
+                        <option value="bank">Bank</option>
+                    </select>
+                </div>
+                <input type="hidden" id="party-category">
+                <div class="form-actions">
+                    <button type="button" id="cancel-add-party-transaction-btn" class="secondary-btn">Cancel</button>
+                    <button type="submit" class="primary-btn">Save Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- PDF Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
+    <script src="js/party.js"></script>
     <script src="js/lang.js"></script>
     <script src="js/app.js"></script>
 </body>
