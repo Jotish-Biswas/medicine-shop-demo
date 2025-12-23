@@ -625,6 +625,7 @@ const statsDayDropdown = document.getElementById('stats-day-dropdown');
 const statsMonthDropdown = document.getElementById('stats-month-dropdown');
 const statsYearDropdown = document.getElementById('stats-year-dropdown');
 const statsManualDate = document.getElementById('stats-manual-date');
+const statsShopTabsContainer = document.getElementById('shop-tabs-container');
 
 function updateStats() {
     const shop = statsShopSelect ? statsShopSelect.value : 'all';
@@ -634,11 +635,11 @@ function updateStats() {
     renderStockMovementReport(shop, month, year, day);
 }
 
-// Handle Shop Tabs
-if (shopTabsContainer) {
-    shopTabsContainer.addEventListener('click', (e) => {
+// Handle Shop Tabs in Stats Modal
+if (statsShopTabsContainer) {
+    statsShopTabsContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('shop-tab')) {
-            document.querySelectorAll('.shop-tab').forEach(tab => tab.classList.remove('active'));
+            statsShopTabsContainer.querySelectorAll('.shop-tab').forEach(tab => tab.classList.remove('active'));
             e.target.classList.add('active');
             
             const value = e.target.dataset.value;
@@ -652,10 +653,12 @@ if (shopTabsContainer) {
 if (statsShopSelect) {
     statsShopSelect.addEventListener('change', (e) => {
         const value = e.target.value;
-        document.querySelectorAll('.shop-tab').forEach(tab => {
-            if (tab.dataset.value === value) tab.classList.add('active');
-            else tab.classList.remove('active');
-        });
+        if (statsShopTabsContainer) {
+            statsShopTabsContainer.querySelectorAll('.shop-tab').forEach(tab => {
+                if (tab.dataset.value === value) tab.classList.add('active');
+                else tab.classList.remove('active');
+            });
+        }
         updateStats();
     });
 }
