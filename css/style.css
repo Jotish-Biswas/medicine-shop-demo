@@ -399,20 +399,26 @@ select:focus {
     align-items: center;
     justify-content: center;
     gap: 2px;
-    min-width: 100px; /* Increased */
+    min-width: 200px; /* Increased significantly as requested */
 }
 
 .stock-input {
-    width: 100%;
-    min-width: 80px; /* Increased base width */
-    height: 30px;
+    width: 200px !important; /* Fixed large width as requested */
+    height: 35px; /* Slightly taller */
+    padding: 0 5px;
     text-align: center;
     border: 1px solid var(--card-border);
     border-radius: 4px;
     font-weight: bold;
-    font-size: 1.1rem; /* Larger font */
+    font-size: 1.2rem; /* Larger font */
     /* Remove spinner for number input */
     -moz-appearance: textfield;
+}
+
+.stock-input::-webkit-outer-spin-button,
+.stock-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .modal-content h2 {

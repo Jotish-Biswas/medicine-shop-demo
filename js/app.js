@@ -159,7 +159,7 @@ function renderTableHeaders() {
     let headers = `
         <th data-i18n="table_name">Name</th>
         <th data-i18n="table_company">Company</th>
-        <th data-i18n="table_price">Price</th>
+        <th data-i18n="table_price">Price (৳)</th>
     `;
 
     shops.forEach(shop => {
@@ -178,12 +178,11 @@ function createMedicineRow(medicine) {
     
     const createStockControl = (shopId) => {
         const stockValue = medicine.stock[shopId] || 0;
-        // Calculate width: approx 1ch per digit + padding. Min 8ch.
-        const width = Math.max(8, String(stockValue).length + 3) + 'ch';
+        
         return `
         <div class="stock-control-group">
             <button class="stock-btn plus" data-id="${medicine.id}" data-shop="${shopId}">▲</button>
-            <input type="number" class="stock-input" data-id="${medicine.id}" data-shop="${shopId}" value="${stockValue}" min="0" style="width: ${width}">
+            <input type="number" class="stock-input" data-id="${medicine.id}" data-shop="${shopId}" value="${stockValue}" min="0">
             <button class="stock-btn minus" data-id="${medicine.id}" data-shop="${shopId}">▼</button>
         </div>
     `};
@@ -197,14 +196,15 @@ function createMedicineRow(medicine) {
         <tr class="${rowClass}">
             <td>
                 <div style="font-weight: 500;">${medicine.name}</div>
-                <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 4px;">${medicine.form}</div>
                 <div style="font-size: 0.8em;">
                     <button class="action-btn edit-btn" onclick="editMedicine(${medicine.id})" style="padding: 2px 6px; font-size: 0.7rem;"><i class="fas fa-edit"></i></button>
                     <button class="action-btn delete-btn" onclick="deleteMedicine(${medicine.id})" style="padding: 2px 6px; font-size: 0.7rem;"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
             <td>${medicine.company}</td>
-            <td>${medicine.price}</td>
+            <td>
+                <input type="number" class="price-input" data-id="${medicine.id}" value="${medicine.price}" step="0.01" style="width: 120px; padding: 4px; border: 1px solid var(--card-border); border-radius: 4px; text-align: center;">
+            </td>
             ${shopCells}
         </tr>
     `;
@@ -235,7 +235,6 @@ window.editMedicine = function(id) {
     // Pre-fill the add item modal for editing
     document.getElementById('new-name').value = med.name;
     document.getElementById('new-company').value = med.company;
-    document.getElementById('new-type').value = med.form;
     document.getElementById('new-price').value = med.price;
     
     // Populate stock inputs
@@ -275,8 +274,14 @@ function getFilteredMedicines() {
 function renderMedicines() {
     renderTableHeaders(); // Ensure headers are up to date
     medicineTableBody.innerHTML = '';
-    const meds = getFilteredMedicines();
+    let meds = getFilteredMedicines();
     
+    // Handle Grouping (Sorting)
+    const groupBy = groupBySelect ? groupBySelect.value : 'none';
+    if (groupBy === 'company') {
+        meds.sort((a, b) => a.company.localeCompare(b.company));
+    }
+
     meds.forEach(med => {
         medicineTableBody.innerHTML += createMedicineRow(med);
     });
@@ -324,6 +329,7 @@ medicineTableBody.addEventListener('click', (e) => {
 });
 
 medicineTableBody.addEventListener('change', (e) => {
+    // Handle Stock Change
     if (e.target.classList.contains('stock-input')) {
         const id = parseInt(e.target.dataset.id);
         const shop = e.target.dataset.shop;
@@ -341,13 +347,24 @@ medicineTableBody.addEventListener('change', (e) => {
             renderMedicines();
         }
     }
+    
+    // Handle Price Change
+    if (e.target.classList.contains('price-input')) {
+        const id = parseInt(e.target.dataset.id);
+        const med = medicines.find(m => m.id === id);
+        const newPrice = parseFloat(e.target.value);
+        
+        if (med && !isNaN(newPrice) && newPrice >= 0) {
+            med.price = newPrice.toFixed(2);
+            // No need to re-render entire table, just update value if needed or leave as is
+            // But re-rendering ensures consistency
+            // renderMedicines(); // Optional, might lose focus
+        }
+    }
 });
 
 medicineTableBody.addEventListener('input', (e) => {
-    if (e.target.classList.contains('stock-input')) {
-        const length = e.target.value.length;
-        e.target.style.width = Math.max(8, length + 3) + 'ch';
-    }
+    // Removed dynamic resizing as we are using fixed large width now
 });
 
 // Quick Actions
@@ -671,6 +688,48 @@ statsBtn.addEventListener('click', () => {
     statsModal.classList.add('show');
 });
 
+// PDF Download Logic
+const downloadPdfBtn = document.getElementById('download-pdf-btn');
+if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener('click', () => {
+        if (!window.jspdf) {
+            alert("PDF library not loaded. Please check your internet connection.");
+            return;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const shopName = statsShopSelect.options[statsShopSelect.selectedIndex].text;
+        const monthName = statsMonthDropdown.options[statsMonthDropdown.selectedIndex].text;
+        const year = statsYearDropdown.value;
+        
+        doc.setFontSize(18);
+        doc.text(`Stock Movement Report`, 14, 22);
+        
+        doc.setFontSize(12);
+        doc.text(`Shop: ${shopName}`, 14, 32);
+        doc.text(`Period: ${monthName} ${year}`, 14, 38);
+        
+        doc.autoTable({
+            html: '#stats-table',
+            startY: 45,
+            theme: 'grid',
+            headStyles: { fillColor: [0, 137, 123] }, // Match primary color
+            styles: { fontSize: 10, cellPadding: 3 },
+            columnStyles: {
+                0: { cellWidth: 20 }, // Day
+                1: { cellWidth: 'auto' }, // Name
+                2: { cellWidth: 25, halign: 'center' }, // Added
+                3: { cellWidth: 25, halign: 'center' }, // Out
+                4: { cellWidth: 30, halign: 'center' }  // Stock
+            }
+        });
+        
+        doc.save(`stock_report_${shopName}_${monthName}_${year}.pdf`);
+    });
+}
+
 closeStatsBtn.addEventListener('click', () => {
     statsModal.classList.remove('show');
 });
@@ -688,7 +747,6 @@ addItemForm.addEventListener('submit', (e) => {
 
     const name = document.getElementById('new-name').value;
     const company = document.getElementById('new-company').value;
-    const type = document.getElementById('new-type').value;
     const price = parseFloat(document.getElementById('new-price').value).toFixed(2);
     
     const stock = {};
@@ -705,7 +763,6 @@ addItemForm.addEventListener('submit', (e) => {
         if (med) {
             med.name = name;
             med.company = company;
-            med.form = type;
             med.price = price;
             
             shops.forEach(shop => {
@@ -729,7 +786,7 @@ addItemForm.addEventListener('submit', (e) => {
             id: newId,
             name: name,
             company: company,
-            form: type,
+            form: '', // Type removed
             price: price,
             stock: stock,
             lowStockThreshold: 10 // Default threshold
