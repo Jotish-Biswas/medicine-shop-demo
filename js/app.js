@@ -178,7 +178,6 @@ function createMedicineRow(medicine) {
     
     const createStockControl = (shopId) => {
         const stockValue = medicine.stock[shopId] || 0;
-        
         return `
         <div class="stock-control-group">
             <button class="stock-btn plus" data-id="${medicine.id}" data-shop="${shopId}">▲</button>
@@ -364,7 +363,18 @@ medicineTableBody.addEventListener('change', (e) => {
 });
 
 medicineTableBody.addEventListener('input', (e) => {
-    // Removed dynamic resizing as we are using fixed large width now
+    if (e.target.classList.contains('stock-input')) {
+        const input = e.target;
+        const value = input.value;
+        const len = value.length || 1;
+        
+        // Base width + width per character
+        // Using 14px per character, adjust as needed for your font
+        const newWidth = 20 + (len * 14); 
+        
+        // Apply width, but don't let it get smaller than a minimum
+        input.style.width = `${Math.max(120, newWidth)}px`;
+    }
 });
 
 // Quick Actions
