@@ -1,23 +1,35 @@
 :root {
-    --bg-color: #fdfbf7;
-    --text-color: #1a1a1a;
-    --card-bg: #ffffff;
-    --card-border: #e0e0e0;
-    --primary-color: #2c3e50;
-    --accent-color: #e74c3c;
-    --low-stock-color: #c0392b;
-    --low-stock-bg: #fadbd8;
-    --shadow: 0 2px 5px rgba(0,0,0,0.05);
+    /* Light Mode Palette */
+    --bg-color: #F7F8FA;
+    --text-color: #111827;
+    --text-secondary: #6B7280;
+    --card-bg: #FFFFFF;
+    --card-border: #E5E7EB;
+    --primary-color: #00897B; /* Deep Teal */
+    --accent-color: #00897B;
+    --danger-color: #DC2626;
+    --low-stock-bg: #FEE2E2;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --input-bg: #FFFFFF;
+    --table-header-bg: #F3F4F6;
+    --table-row-hover: #F9FAFB;
 }
 
 [data-theme="dark"] {
-    --bg-color: #121212;
-    --text-color: #e0e0e0;
-    --card-bg: #1e1e1e;
-    --card-border: #333333;
-    --primary-color: #ecf0f1;
-    --low-stock-bg: #3e1a1a;
-    --shadow: 0 2px 5px rgba(0,0,0,0.3);
+    /* Dark Mode Palette */
+    --bg-color: #0F172A;
+    --text-color: #E5E7EB;
+    --text-secondary: #9CA3AF;
+    --card-bg: #1F2933;
+    --card-border: #374151;
+    --primary-color: #00897B;
+    --accent-color: #00897B;
+    --danger-color: #F87171;
+    --low-stock-bg: #450a0a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    --input-bg: #111827;
+    --table-header-bg: #1F2933;
+    --table-row-hover: #374151;
 }
 
 * {
@@ -32,18 +44,20 @@ body {
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
     padding-bottom: 80px;
+    font-size: 16px; /* Base size */
 }
 
+/* Header */
 header {
     position: sticky;
     top: 0;
-    background-color: var(--bg-color);
+    background-color: var(--bg-color); /* Match body bg for clean look */
     padding: 1rem;
-    border-bottom: 1px solid var(--card-border);
     z-index: 100;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    border-bottom: 1px solid var(--card-border);
 }
 
 .header-top {
@@ -53,8 +67,9 @@ header {
 }
 
 h1 {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
+    color: var(--text-color);
 }
 
 .controls {
@@ -62,195 +77,290 @@ h1 {
     gap: 0.5rem;
 }
 
+/* Buttons */
 button {
     background: none;
     border: 1px solid var(--card-border);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
     cursor: pointer;
     color: var(--text-color);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
-button.active {
-    background-color: var(--text-color);
-    color: var(--bg-color);
+.primary-btn {
+    background-color: var(--primary-color);
+    color: #FFFFFF;
+    border: none;
+    font-weight: 600;
 }
 
-.search-container {
+.primary-btn:hover {
+    opacity: 0.9;
+}
+
+.icon-btn {
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--danger-color);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* Search Section (Amazon Style) */
+.search-section {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 800px;
+    margin: 0 auto;
     width: 100%;
+}
+
+.search-wrapper {
+    display: flex;
+    flex: 1;
+    position: relative;
 }
 
 #search-bar {
     width: 100%;
-    padding: 0.8rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--card-border);
+    border-radius: 6px 0 0 6px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    outline: none;
+}
+
+#search-bar:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.1);
+}
+
+.search-icon-btn {
+    background-color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 0 6px 6px 0;
+    color: white;
+    padding: 0 1.2rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-icon-btn:hover {
+    background-color: var(--accent-color);
+}
+
+.filter-wrapper {
+    width: 200px; /* Fixed width for filter */
+}
+
+#group-by {
+    width: 100%;
+    height: 100%;
+    padding: 0 1rem;
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    background-color: var(--card-bg);
+    background-color: var(--card-bg); /* Distinct from search */
+    color: var(--text-color);
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+/* Hide Spin Buttons */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    background-color: var(--bg-color);
     color: var(--text-color);
     font-size: 1rem;
 }
 
-main {
-    padding: 1rem;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.1);
 }
 
-@media (min-width: 600px) {
-    main {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+/* Dashboard Stats */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2.5fr; /* Adjusted: Quick Actions gets more space */
+    gap: 1rem;
+    padding: 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+    .stat-summary-card:last-child {
+        grid-column: span 2;
     }
 }
 
-.medicine-card {
+@media (max-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    .stat-summary-card:last-child {
+        grid-column: auto;
+    }
+}
+
+.stat-summary-card {
     background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
+    padding: 1.5rem;
     border-radius: 12px;
-    padding: 1rem;
     box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.medicine-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-.medicine-name {
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.medicine-form {
-    font-size: 0.8rem;
-    background-color: var(--card-border);
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    color: var(--text-color);
-}
-
-.medicine-company {
-    font-size: 0.9rem;
-    opacity: 0.8;
-}
-
-.medicine-details {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.5rem;
-}
-
-.price {
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-
-.stock-control {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.stock-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
     border: 1px solid var(--card-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    padding: 0;
-}
-
-.stock-count {
-    font-weight: bold;
-    min-width: 20px;
     text-align: center;
 }
 
-.low-stock-indicator {
-    display: none;
-    font-size: 0.8rem;
-    color: var(--low-stock-color);
-    background-color: var(--low-stock-bg);
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    margin-top: 0.5rem;
-    text-align: center;
-}
-
-.medicine-card.low-stock .low-stock-indicator {
-    display: block;
-}
-
-.medicine-card.low-stock {
-    border-color: var(--low-stock-color);
-}
-
-/* Grouping Styles */
-.group-section {
-    grid-column: 1 / -1;
-    margin-top: 1rem;
-}
-
-.group-title {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--card-border);
-    color: var(--primary-color);
-}
-
-.group-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-}
-
-@media (min-width: 600px) {
-    .group-grid {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    }
-}
-
-/* Updated Stock Controls */
-.stock-controls-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    background-color: var(--bg-color);
-    padding: 0.5rem;
-    border-radius: 8px;
-}
-
-.stock-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.shop-label {
-    font-weight: bold;
+.stat-summary-card h3 {
     font-size: 0.9rem;
-    color: var(--primary-color);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
 }
 
-.total-stock {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    text-align: right;
-    font-weight: bold;
+.stat-highlight {
+    font-size: 2rem;
+    font-weight: 700;
     color: var(--text-color);
 }
-/* Modal Styles */
+
+.stat-highlight.alert {
+    color: var(--danger-color);
+}
+
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap; /* Allow wrapping if needed */
+}
+
+/* Main Grid Layout */
+#medicine-list-container {
+    padding: 1rem;
+    max-width: 1400px; /* Increased max-width */
+    margin: 0 auto;
+    overflow-x: auto; /* Allow horizontal scroll on small screens */
+}
+
+/* Table Styles */
+#medicine-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
+}
+
+#medicine-table th,
+#medicine-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--card-border);
+    vertical-align: middle;
+}
+
+#medicine-table th {
+    background-color: var(--table-header-bg);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+#medicine-table tr:last-child td {
+    border-bottom: none;
+}
+
+#medicine-table tr:hover {
+    background-color: var(--table-row-hover);
+}
+
+.table-stock-control {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.table-stock-control .stock-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+    padding: 0;
+    border-radius: 4px;
+}
+
+.table-stock-control .stock-input {
+    width: 50px;
+    padding: 0.3rem;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.low-stock-row {
+    background-color: var(--low-stock-bg) !important;
+}
+
+.low-stock-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: var(--danger-color);
+    border-radius: 50%;
+    margin-left: 0.5rem;
+}
+
+/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -273,14 +383,42 @@ main {
     padding: 2rem;
     border-radius: 12px;
     width: 90%;
-    max-width: 500px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    max-width: 600px;
+    max-height: 95vh; /* Increased to maximize vertical space */
+    overflow-y: auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     border: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Vertical Stock Control */
+.stock-control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 100px; /* Increased */
+}
+
+.stock-input {
+    width: 100%;
+    min-width: 80px; /* Increased base width */
+    height: 30px;
+    text-align: center;
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 1.1rem; /* Larger font */
+    /* Remove spinner for number input */
+    -moz-appearance: textfield;
 }
 
 .modal-content h2 {
-    margin-bottom: 1.5rem;
-    color: var(--primary-color);
+    margin-bottom: 1rem; /* Reduced from 1.5rem */
+    color: var(--text-color);
+    font-size: 1.2rem; /* Reduced font size */
 }
 
 .form-group {
@@ -300,34 +438,14 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
-}
-
-input[type="text"],
-input[type="number"] {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid var(--card-border);
-    border-radius: 6px;
-    background-color: var(--bg-color);
     color: var(--text-color);
-    font-size: 1rem;
 }
 
 .form-actions {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
-    margin-top: 1.5rem;
-}
-
-.primary-btn {
-    background-color: var(--primary-color);
-    color: var(--bg-color);
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
+    margin-top: 1rem; /* Reduced from 1.5rem */
 }
 
 .secondary-btn {
@@ -337,123 +455,6 @@ input[type="number"] {
     padding: 0.8rem 1.5rem;
     border-radius: 6px;
     cursor: pointer;
-}
-
-/* Button Hover Effects */
-.primary-btn:hover {
-    opacity: 0.9;
-}
-
-.secondary-btn:hover {
-    background-color: var(--card-border);
-}
-/* Accessibility & New Features */
-
-/* Larger Fonts */
-body {
-    font-size: 18px; /* Increased base font size */
-}
-
-h1 {
-    font-size: 2rem;
-}
-
-.medicine-name {
-    font-size: 1.4rem;
-}
-
-.price {
-    font-size: 1.3rem;
-}
-
-/* Larger Buttons */
-button {
-    padding: 0.8rem 1.2rem;
-    font-size: 1rem;
-}
-
-.stock-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.stock-btn.plus {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border-color: #c8e6c9;
-}
-
-.stock-btn.minus {
-    background-color: #ffebee;
-    color: #c62828;
-    border-color: #ffcdd2;
-}
-
-/* Stock Input */
-.stock-input {
-    width: 60px;
-    text-align: center;
-    font-size: 1.1rem;
-    font-weight: bold;
-    padding: 0.4rem;
-    border: 1px solid var(--card-border);
-    border-radius: 4px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-}
-
-/* Alerts Badge */
-.icon-btn {
-    position: relative;
-    font-size: 1.5rem;
-    padding: 0.5rem;
-    border: none;
-}
-
-.badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: var(--accent-color);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.stat-card {
-    background-color: var(--bg-color);
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--card-border);
-    text-align: center;
-}
-
-.stat-card h3 {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-    opacity: 0.8;
-}
-
-.stat-value {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary-color);
 }
 
 /* Alerts List */
@@ -472,6 +473,248 @@ button {
     padding: 0.8rem;
     background-color: var(--low-stock-bg);
     border-radius: 6px;
-    color: var(--low-stock-color);
+    color: var(--danger-color);
     font-weight: 500;
+}
+
+/* Stats Grid in Modal */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem; /* Reduced from 1rem */
+    margin-bottom: 1rem; /* Reduced from 1.5rem */
+}
+
+.stat-card {
+    background-color: var(--bg-color);
+    padding: 0.5rem; /* Reduced from 1rem */
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 0.8rem; /* Reduced from 0.9rem */
+    margin-bottom: 0.2rem; /* Reduced from 0.5rem */
+    color: var(--text-secondary);
+}
+
+.stat-value {
+    font-size: 1.1rem; /* Reduced from 1.5rem */
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Stock Movement Report Styles */
+.report-table th {
+    font-weight: 600;
+    border-bottom: 2px solid var(--card-border);
+    background-color: var(--table-header-bg);
+}
+
+.report-table td {
+    border-bottom: 1px solid var(--card-border);
+    vertical-align: middle;
+}
+
+.report-table tr:nth-child(even) {
+    background-color: var(--table-row-hover);
+}
+
+.report-table tr:hover {
+    background-color: rgba(0, 137, 123, 0.05);
+}
+
+/* Ensure sticky header works within the container */
+.table-container {
+    position: relative;
+}
+
+/* Shop Tabs Styles */
+.shop-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.shop-tab {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    color: var(--text-color);
+}
+
+.shop-tab:hover {
+    background: var(--table-row-hover);
+}
+
+.shop-tab.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Stock Control Buttons */
+.stock-control-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    justify-content: center;
+}
+
+.stock-btn {
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 0;
+}
+
+.stock-btn:hover {
+    background: var(--table-row-hover);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.stock-btn.plus {
+    color: var(--primary-color);
+}
+
+.stock-btn.minus {
+    color: var(--danger-color);
+}
+
+/* Updated Stock Control Styles */
+.stock-control-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.stock-input {
+    width: 60px !important; /* Wider */
+    height: 34px; /* Taller */
+    font-size: 1rem;
+    text-align: center;
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.stock-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stock-btn {
+    width: 24px;
+    height: 16px;
+    font-size: 10px;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Vertical Stock Control */
+.stock-control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    /* Removed fixed min-width to let content dictate size, or set a consistent one */
+    width: fit-content;
+    min-width: 60px; 
+}
+
+.stock-input {
+    /* Make input width consistent with buttons or vice versa */
+    width: 100%; 
+    min-width: 60px; 
+    height: 30px;
+    text-align: center;
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 1rem;
+    -moz-appearance: textfield;
+    padding: 0; /* Remove padding to maximize space for numbers */
+}
+
+.stock-input::-webkit-outer-spin-button,
+.stock-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.stock-btn {
+    width: 100%; /* Match the input width */
+    height: 20px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    border-radius: 2px;
+}
+
+.stock-btn:hover {
+    background: var(--table-row-hover);
+}
+
+/* Labeled Quick Action Buttons */
+.labeled-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: auto;
+    height: auto;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    transition: all 0.2s;
+}
+
+.labeled-btn:hover {
+    background-color: var(--table-row-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.btn-icon {
+    font-size: 1.5rem;
+}
+
+.btn-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* Large Modal */
+.modal-lg {
+    max-width: 1400px; /* Increased width */
+    width: 98%;
 }

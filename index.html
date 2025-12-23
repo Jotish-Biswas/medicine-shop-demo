@@ -11,11 +11,12 @@
         <div class="header-top">
             <h1 data-i18n="app_title">Medicine Shop</h1>
             <div class="controls">
-                <button id="alert-btn" class="icon-btn" aria-label="Alerts">
-                    ⚠️ <span id="alert-badge" class="badge">0</span>
+                <button id="alert-btn" class="icon-btn" aria-label="Alerts" style="width: auto; padding-right: 1rem;">
+                    ⚠️ <span style="margin-left: 0.5rem; font-size: 0.9rem;">Alerts (সতর্কতা)</span>
+                    <span id="alert-badge" class="badge">0</span>
                 </button>
-                <button id="stats-btn" class="icon-btn" aria-label="Statistics">
-                    📊
+                <button id="stats-btn" class="icon-btn" aria-label="Statistics" style="width: auto; padding-right: 1rem;">
+                    📊 <span style="margin-left: 0.5rem; font-size: 0.9rem;">Statistics (পরিসংখ্যান)</span>
                 </button>
                 <button id="add-item-btn" class="primary-btn" data-i18n="add_item_btn">Add New Item</button>
                 <button class="lang-btn active" data-lang="en" data-i18n="lang_en">EN</button>
@@ -25,20 +26,70 @@
                 </button>
             </div>
         </div>
-        <div class="search-container">
-            <input type="text" id="search-bar" placeholder="Search medicine..." data-i18n="search_placeholder">
-        </div>
-        <div class="filter-container" style="margin-top: 10px;">
-            <select id="group-by" style="width: 100%; padding: 0.8rem; border: 1px solid var(--card-border); border-radius: 8px; background-color: var(--card-bg); color: var(--text-color); font-size: 1rem;">
-                <option value="none">No Grouping</option>
-                <option value="company">Group by Company</option>
-                <option value="form">Group by Type</option>
-            </select>
+        <div class="search-section">
+            <div class="search-wrapper">
+                <input type="text" id="search-bar" placeholder="Search medicine..." data-i18n="search_placeholder">
+                <button class="search-icon-btn">🔍</button>
+            </div>
+            <div class="filter-wrapper">
+                <select id="group-by">
+                    <option value="none">No Grouping</option>
+                    <option value="company">Group by Company</option>
+                    <option value="form">Group by Type</option>
+                </select>
+            </div>
         </div>
     </header>
 
-    <main id="medicine-list">
-        <!-- Medicine cards will be injected here by JS -->
+    <div class="dashboard-stats">
+        <div class="stat-summary-card">
+            <h3>Total Inventory Value</h3>
+            <p id="total-inventory-value" class="stat-highlight">$0.00</p>
+        </div>
+        <div class="stat-summary-card">
+            <h3>Low Stock Alerts</h3>
+            <p id="low-stock-count" class="stat-highlight alert">0 Items</p>
+        </div>
+        <div class="stat-summary-card">
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+                <button id="quick-add-btn" class="icon-btn labeled-btn">
+                    <span class="btn-icon">➕</span>
+                    <span class="btn-label" data-i18n="quick_add_med">Add Medicine</span>
+                </button>
+                <button id="add-shop-btn" class="icon-btn labeled-btn">
+                    <span class="btn-icon">🏪</span>
+                    <span class="btn-label" data-i18n="quick_add_shop">Add Shop</span>
+                </button>
+                <button id="delete-shop-btn" class="icon-btn labeled-btn">
+                    <span class="btn-icon">🗑️</span>
+                    <span class="btn-label" data-i18n="quick_delete_shop">Shop</span>
+                </button>
+                <button id="delete-medicine-btn" class="icon-btn labeled-btn">
+                    <span class="btn-icon">💊</span>
+                    <span class="btn-label">Del Med</span>
+                </button>
+                <button id="quick-stats-btn" class="icon-btn labeled-btn">
+                    <span class="btn-icon">📊</span>
+                    <span class="btn-label" data-i18n="quick_stats">Statistics</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main id="medicine-list-container">
+        <div class="table-wrapper" style="overflow-x: auto;">
+            <table id="medicine-table">
+                <thead>
+                    <tr id="table-header-row">
+                        <!-- Headers will be injected by JS -->
+                    </tr>
+                </thead>
+                <tbody id="medicine-table-body">
+                    <!-- Rows will be injected here -->
+                </tbody>
+            </table>
+        </div>
     </main>
 
     <!-- Add Item Modal -->
@@ -62,31 +113,53 @@
                     <label for="new-price" data-i18n="label_price">Price</label>
                     <input type="number" id="new-price" step="0.01" required>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="new-stock-main" data-i18n="label_stock_main">Main Store</label>
-                        <input type="number" id="new-stock-main" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="new-stock-g1" data-i18n="label_stock_g1">G1</label>
-                        <input type="number" id="new-stock-g1" value="0" min="0">
-                    </div>
+                
+                <!-- Dynamic Shop Inputs -->
+                <div id="shop-stock-inputs-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <!-- Inputs injected by JS -->
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="new-stock-g2" data-i18n="label_stock_g2">G2</label>
-                        <input type="number" id="new-stock-g2" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="new-stock-g3" data-i18n="label_stock_g3">G3</label>
-                        <input type="number" id="new-stock-g3" value="0" min="0">
-                    </div>
-                </div>
-                <div class="form-actions">
+
+                <div class="form-actions" style="margin-top: 1.5rem;">
                     <button type="button" id="cancel-btn" class="secondary-btn" data-i18n="btn_cancel">Cancel</button>
                     <button type="submit" class="primary-btn" data-i18n="btn_add">Add Medicine</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Delete Shop Modal -->
+    <div id="delete-shop-modal" class="modal">
+        <div class="modal-content">
+            <h2>Delete Shop</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Select the shop you want to delete. This action cannot be undone.</p>
+            <div class="form-group">
+                <label for="delete-shop-select-dropdown">Select Shop</label>
+                <select id="delete-shop-select-dropdown">
+                    <!-- Options injected by JS -->
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="cancel-delete-shop-btn" class="secondary-btn">Cancel</button>
+                <button type="button" id="confirm-delete-shop-btn" class="primary-btn" style="background-color: var(--danger-color);">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Medicine Modal -->
+    <div id="delete-medicine-modal" class="modal">
+        <div class="modal-content">
+            <h2>Delete Medicine</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Select the medicine to delete. This will remove it from all shops.</p>
+            <div class="form-group">
+                <label for="delete-med-select">Select Medicine (Name - Company)</label>
+                <select id="delete-med-select" style="width: 100%; padding: 0.8rem; border: 1px solid var(--card-border); border-radius: 6px; background: var(--input-bg); color: var(--text-color);">
+                    <!-- Options injected by JS -->
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="cancel-delete-med-btn" class="secondary-btn">Cancel</button>
+                <button type="button" id="confirm-delete-med-btn" class="primary-btn" style="background-color: var(--danger-color);">Delete</button>
+            </div>
         </div>
     </div>
 
@@ -105,42 +178,106 @@
 
     <!-- Statistics Modal -->
     <div id="stats-modal" class="modal">
-        <div class="modal-content">
-            <h2 data-i18n="stats_title">Statistics</h2>
+        <div class="modal-content modal-lg">
+            <h2 data-i18n="stats_title">Statistics (পরিসংখ্যান)</h2>
+            
+            <!-- Overall Summary -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <h3 data-i18n="stat_daily_in">Daily In</h3>
-                    <p id="stat-daily-in" class="stat-value">0</p>
+                    <h3>Today's Sales</h3>
+                    <p id="stat-daily-sales" class="stat-value">৳0.00</p>
                 </div>
                 <div class="stat-card">
-                    <h3 data-i18n="stat_daily_out">Daily Out</h3>
-                    <p id="stat-daily-out" class="stat-value">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3 data-i18n="stat_monthly_in">Monthly In</h3>
-                    <p id="stat-monthly-in" class="stat-value">0</p>
-                </div>
-                                <div class="stat-card">
-                    <h3 data-i18n="stat_monthly_out">Monthly Out</h3>
-                    <p id="stat-monthly-out" class="stat-value">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3 data-i18n="stat_daily_purchase">Daily Purchase (৳)</h3>
-                    <p id="stat-daily-purchase" class="stat-value">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3 data-i18n="stat_daily_sales">Daily Sales (৳)</h3>
-                    <p id="stat-daily-sales" class="stat-value">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3 data-i18n="stat_monthly_purchase">Monthly Purchase (৳)</h3>
-                    <p id="stat-monthly-purchase" class="stat-value">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3 data-i18n="stat_monthly_sales">Monthly Sales (৳)</h3>
-                    <p id="stat-monthly-sales" class="stat-value">0</p>
+                    <h3>Monthly Sales</h3>
+                    <p id="stat-monthly-sales" class="stat-value">৳0.00</p>
                 </div>
             </div>
+
+            <!-- Shop-wise Detailed Stats -->
+            <div class="shop-stats-section" style="margin-top: 0.5rem; border-top: 1px solid var(--card-border); padding-top: 0.5rem;">
+                
+                <!-- Shop Selection Tabs -->
+                <div class="shop-tabs" id="shop-tabs-container" style="margin-bottom: 0.5rem;">
+                    <button class="shop-tab active" data-value="all">All Shops</button>
+                    <button class="shop-tab" data-value="main">Main Store</button>
+                    <button class="shop-tab" data-value="a">Shop A</button>
+                    <button class="shop-tab" data-value="b">Shop B</button>
+                    <button class="shop-tab" data-value="c">Shop C</button>
+                    <button class="shop-tab" data-value="d">Shop D</button>
+                    <button class="shop-tab" data-value="e">Shop E</button>
+                </div>
+
+                <div class="stats-controls" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                    <h3 style="margin-right: auto; font-size: 1rem;">Stock Movement Report</h3>
+                    
+                    <div class="control-group">
+                        <label for="stats-shop-select" style="font-size: 0.9rem; color: var(--text-secondary);">Shop:</label>
+                        <select id="stats-shop-select" style="padding: 0.5rem; border: 1px solid var(--card-border); border-radius: 6px; background: var(--input-bg); color: var(--text-color);">
+                            <option value="all">All Shops</option>
+                            <option value="main">Main Store</option>
+                            <option value="a">Shop A</option>
+                            <option value="b">Shop B</option>
+                            <option value="c">Shop C</option>
+                            <option value="d">Shop D</option>
+                            <option value="e">Shop E</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label style="font-size: 0.9rem; color: var(--text-secondary);">Date:</label>
+                        
+                        <!-- Day Dropdown -->
+                        <select id="stats-day-dropdown" style="padding: 0.5rem; border: 1px solid var(--card-border); border-radius: 6px; background: var(--input-bg); color: var(--text-color);">
+                            <option value="all">All Days</option>
+                            <!-- 1-31 will be injected by JS -->
+                        </select>
+
+                        <!-- Month Dropdown -->
+                        <select id="stats-month-dropdown" style="padding: 0.5rem; border: 1px solid var(--card-border); border-radius: 6px; background: var(--input-bg); color: var(--text-color);">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+
+                        <!-- Year Dropdown -->
+                        <select id="stats-year-dropdown" style="padding: 0.5rem; border: 1px solid var(--card-border); border-radius: 6px; background: var(--input-bg); color: var(--text-color);">
+                            <!-- Populated by JS -->
+                        </select>
+
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">OR</span>
+                        
+                        <!-- Manual Input -->
+                        <input type="text" id="stats-manual-date" placeholder="DD/MM/YYYY" style="padding: 0.5rem; width: 120px; border: 1px solid var(--card-border); border-radius: 6px; background: var(--input-bg); color: var(--text-color);">
+                    </div>
+                </div>
+                
+                <div class="table-container" style="max-height: 70vh; overflow-y: auto; border: 1px solid var(--card-border); border-radius: 8px;">
+                    <table id="stats-table" class="report-table" style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                        <thead style="position: sticky; top: 0; background: var(--table-header-bg); z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <tr>
+                                <th style="text-align: center; padding: 1rem; width: 60px;">Day</th>
+                                <th style="text-align: left; padding: 1rem;">Medicine Name</th>
+                                <th style="text-align: center; padding: 1rem; color: var(--primary-color);">Added</th>
+                                <th style="text-align: center; padding: 1rem; color: var(--danger-color);">Out</th>
+                                <th style="text-align: center; padding: 1rem; font-weight: bold;">Present Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-table-body">
+                            <!-- Stock Movement Rows will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="form-actions">
                 <button type="button" id="close-stats-btn" class="primary-btn" data-i18n="btn_close">Close</button>
             </div>
