@@ -118,14 +118,16 @@ function getStats() {
 }
 
 const medicineTableBody = document.getElementById('medicine-table-body');
-const groupBySelect = document.getElementById('group-by');
+const groupBy = document.getElementById('group-by');
 const searchBar = document.getElementById('search-bar');
-
-// Dashboard Elements
+const shopTabsContainer = document.getElementById('shop-tabs');
 const totalInventoryValueEl = document.getElementById('total-inventory-value');
 const lowStockCountEl = document.getElementById('low-stock-count');
+
+// Dashboard Elements
 const quickAddBtn = document.getElementById('quick-add-btn');
 const quickStatsBtn = document.getElementById('quick-stats-btn');
+const addMedicineBtn = document.getElementById('add-medicine-btn');
 
 // Modal Elements
 const addItemBtn = document.getElementById('add-item-btn');
@@ -152,299 +154,329 @@ function getTotalStock(med) {
     return total;
 }
 
-function renderTableHeaders() {
-    const headerRow = document.getElementById('table-header-row');
-    if (!headerRow) return;
-
-    let headers = `
-        <th data-i18n="table_name">Name</th>
-        <th data-i18n="table_company">Company</th>
-        <th data-i18n="table_price">Price (৳)</th>
-        <th>Total Stock</th>
-    `;
-
-    shops.forEach(shop => {
-        headers += `<th>${shop.name}</th>`;
-    });
-
-    // Removed Total Price column as requested
-    headerRow.innerHTML = headers;
+function getMedicines() {
+    return medicines;
 }
 
-function createMedicineRow(medicine) {
-    // Check for low stock
-    const totalStock = getTotalStock(medicine);
-    const isLowStock = totalStock < medicine.lowStockThreshold;
-    const rowClass = isLowStock ? 'low-stock-row' : '';
+function getShops() {
+    return shops;
+}
+
+function renderTableHeaders() {
+    const thead = document.getElementById('medicine-table-head');
+    if (!thead) return;
+    thead.innerHTML = '';
+    const tr = document.createElement('tr');
+
+    const headers = ['#', 'Name', 'Company', 'Price', 'Total Stock'];
+    const activeShop = document.querySelector('.shop-tab.active')?.dataset.shop || 'all';
+
+    let headerHTML = headers.map(h => `<th>${h}</th>`).join('');
     
-    const createStockControl = (shopId) => {
-        const stockValue = medicine.stock[shopId] || 0;
-        return `
-        <div class="stock-control-group">
-            <button class="stock-btn plus" data-id="${medicine.id}" data-shop="${shopId}">▲</button>
-            <input type="number" class="stock-input" data-id="${medicine.id}" data-shop="${shopId}" value="${stockValue}" min="0">
-            <button class="stock-btn minus" data-id="${medicine.id}" data-shop="${shopId}">▼</button>
-        </div>
-    `};
+    if (activeShop === 'all') {
+        const allShops = getShops();
+        const shopHeaders = allShops.map(s => `<th>${s.name}</th>`).join('');
+        headerHTML += shopHeaders + '<th></th>';
+    } else {
+        headerHTML += '<th>Stock</th><th></th>';
+    }
+    
+    tr.innerHTML = headerHTML;
+    thead.appendChild(tr);
+}
 
-    let shopCells = '';
-    shops.forEach(shop => {
-        shopCells += `<td>${createStockControl(shop.id)}</td>`;
-    });
+function createMedicineRow(medicine, index) {
+    const tr = document.createElement('tr');
+    const activeShop = document.querySelector('.shop-tab.active')?.dataset.shop || 'all';
+    const allShops = getShops();
+    const totalStock = getTotalStock(medicine);
 
-    return `
-        <tr class="${rowClass}">
+    let cells = `
+        <td>${index + 1}</td>
+        <td>
+            ${medicine.name}
+            ${totalStock <= (medicine.lowStockThreshold || 10) ? '<span class="low-stock-dot"></span>' : ''}
+        </td>
+        <td>${medicine.company}</td>
+        <td>
+            <input type="number" class="price-input" data-id="${medicine.id}" value="${medicine.price}" step="0.01" min="0">
+        </td>
+        <td style="font-weight: bold; text-align: center;">${totalStock}</td>
+    `;
+
+    if (activeShop === 'all') {
+        allShops.forEach(shop => {
+            const stock = medicine.stock[shop.id] || 0;
+            cells += `
+                <td>
+                    <div class="table-stock-control">
+                        <input type="number" class="stock-input" data-id="${medicine.id}" data-shop="${shop.id}" value="${stock}" min="0">
+                        <div class="stock-buttons">
+                            <button class="stock-btn plus" data-id="${medicine.id}" data-shop="${shop.id}">+</button>
+                            <button class="stock-btn minus" data-id="${medicine.id}" data-shop="${shop.id}">-</button>
+                        </div>
+                    </div>
+                </td>
+            `;
+        });
+    } else {
+        const stock = medicine.stock[activeShop] || 0;
+        cells += `
             <td>
-                <div style="font-weight: 500;">${medicine.name}</div>
-                <div style="font-size: 0.8em;">
-                    <button class="action-btn edit-btn" onclick="editMedicine(${medicine.id})" style="padding: 2px 6px; font-size: 0.7rem;"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn delete-btn" onclick="deleteMedicine(${medicine.id})" style="padding: 2px 6px; font-size: 0.7rem;"><i class="fas fa-trash"></i></button>
+                <div class="table-stock-control">
+                    <input type="number" class="stock-input" data-id="${medicine.id}" data-shop="${activeShop}" value="${stock}" min="0">
+                    <div class="stock-buttons">
+                        <button class="stock-btn plus" data-id="${medicine.id}" data-shop="${activeShop}">+</button>
+                        <button class="stock-btn minus" data-id="${medicine.id}" data-shop="${activeShop}">-</button>
+                    </div>
                 </div>
             </td>
-            <td>${medicine.company}</td>
-            <td>
-                <input type="number" class="price-input" data-id="${medicine.id}" value="${medicine.price}" step="0.01" style="width: 120px; padding: 4px; border: 1px solid var(--card-border); border-radius: 4px; text-align: center;">
-            </td>
-            <td style="font-weight: bold; text-align: center;">${totalStock}</td>
-            ${shopCells}
-        </tr>
+        `;
+    }
+
+    cells += `
+        <td>
+            <button class="delete-btn" data-id="${medicine.id}" data-i18n-title="del_med_title"><i class="fas fa-trash-alt"></i></button>
+        </td>
     `;
-}
+    
+    tr.innerHTML = cells;
 
-function updateDashboardStats() {
-    const totalMedicines = medicines.length;
-    const lowStockCount = medicines.filter(m => getTotalStock(m) < m.lowStockThreshold).length;
-
-    const totalMedicinesEl = document.getElementById('total-medicines-count');
-    const lowStockCountEl = document.getElementById('low-stock-count');
-
-    if (totalMedicinesEl) totalMedicinesEl.textContent = totalMedicines;
-    if (lowStockCountEl) {
-        lowStockCountEl.textContent = `${lowStockCount} Items`;
-        if (lowStockCount > 0) {
-            lowStockCountEl.classList.add('alert');
-        } else {
-            lowStockCountEl.classList.remove('alert');
-        }
+    if (totalStock <= (medicine.lowStockThreshold || 10)) {
+        tr.classList.add('low-stock-row');
     }
+
+    return tr;
 }
 
-window.editMedicine = function(id) {
-    const med = medicines.find(m => m.id === id);
-    if (!med) return;
-    
-    // Pre-fill the add item modal for editing
-    document.getElementById('new-name').value = med.name;
-    document.getElementById('new-company').value = med.company;
-    document.getElementById('new-price').value = med.price;
-    
-    // Populate stock inputs
-    shops.forEach(shop => {
-        const input = document.getElementById(`new-stock-${shop.id}`);
-        if (input) {
-            input.value = med.stock[shop.id] || 0;
-        }
-    });
-    
-    // Store the ID being edited in the form dataset
-    const form = document.getElementById('add-item-form');
-    form.dataset.editId = id;
-    
-    // Open modal
-    document.getElementById('add-item-modal').classList.add('show');
-}
-
-window.deleteMedicine = function(id) {
-    if(confirm('Are you sure you want to delete this medicine?')) {
-        const index = medicines.findIndex(m => m.id === id);
-        if (index > -1) {
-            medicines.splice(index, 1);
-            renderMedicines();
-        }
-    }
-}
-
-function getFilteredMedicines() {
-    const searchTerm = searchBar.value.toLowerCase();
-    return medicines.filter(med => 
-        med.name.toLowerCase().includes(searchTerm) || 
-        med.company.toLowerCase().includes(searchTerm)
+function renderMedicines(filter = '', group = 'all') {
+    const allMedicines = getMedicines();
+    const filteredMedicines = allMedicines.filter(m => 
+        m.name.toLowerCase().includes(filter.toLowerCase()) ||
+        m.company.toLowerCase().includes(filter.toLowerCase())
     );
+
+    if (!medicineTableBody) return;
+    medicineTableBody.innerHTML = '';
+    renderTableHeaders();
+
+    if (group === 'company') {
+        const groupedByCompany = filteredMedicines.reduce((acc, med) => {
+            (acc[med.company] = acc[med.company] || []).push(med);
+            return acc;
+        }, {});
+
+        Object.keys(groupedByCompany).sort().forEach(company => {
+            const groupHeader = document.createElement('tr');
+            groupHeader.innerHTML = `<td colspan="100%" style="background-color: var(--table-header-bg); font-weight: bold;">${company}</td>`;
+            medicineTableBody.appendChild(groupHeader);
+            groupedByCompany[company].forEach((med, index) => {
+                medicineTableBody.appendChild(createMedicineRow(med, index));
+            });
+        });
+    } else {
+        filteredMedicines.forEach((med, index) => {
+            medicineTableBody.appendChild(createMedicineRow(med, index));
+        });
+    }
+    updateAlertBadge();
 }
 
-function renderMedicines() {
-    renderTableHeaders(); // Ensure headers are up to date
-    medicineTableBody.innerHTML = '';
-    let meds = getFilteredMedicines();
-    
-    // Handle Grouping (Sorting)
-    const groupBy = groupBySelect ? groupBySelect.value : 'none';
-    if (groupBy === 'company') {
-        meds.sort((a, b) => a.company.localeCompare(b.company));
+function updateAlertBadge() {
+    const lowStockMeds = medicines.filter(m => getTotalStock(m) <= (m.lowStockThreshold || 10));
+    if (alertBadge) {
+        alertBadge.textContent = lowStockMeds.length;
     }
+}
 
-    meds.forEach(med => {
-        medicineTableBody.innerHTML += createMedicineRow(med);
-    });
-
-    // Re-apply translations to new elements
-    if (typeof updateText === 'function') {
-        updateText();
-    }
-    updateDashboardStats();
+function renderDashboard() {
+    // Dashboard cards removed - function kept for compatibility
 }
 
 // Initial Render
 renderMedicines();
 
 // Search Functionality
-searchBar.addEventListener('input', () => {
-    renderMedicines();
-});
+if (searchBar) {
+    searchBar.addEventListener('input', () => {
+        const filter = searchBar.value;
+        const group = groupBy ? groupBy.value : 'all';
+        renderMedicines(filter, group);
+    });
+}
 
-// Group By Functionality - Currently just re-renders, table doesn't support visual grouping yet
-groupBySelect.addEventListener('change', () => {
-    renderMedicines();
-});
+// Group By Functionality
+if (groupBy) {
+    groupBy.addEventListener('change', () => {
+        const filter = searchBar ? searchBar.value : '';
+        const group = groupBy.value;
+        renderMedicines(filter, group);
+    });
+}
 
 // Stock Interaction (Delegation) - Input and Buttons
-medicineTableBody.addEventListener('click', (e) => {
-    if (e.target.classList.contains('stock-btn')) {
-        const id = parseInt(e.target.dataset.id);
-        const shop = e.target.dataset.shop;
-        const med = medicines.find(m => m.id === id);
-        
-        if (med && shop) {
-            const amountStr = prompt("Enter amount to add/subtract:", "1");
-            const amount = parseInt(amountStr);
+if (medicineTableBody) {
+    medicineTableBody.addEventListener('click', (e) => {
+        if (e.target.classList.contains('stock-btn')) {
+            const id = parseInt(e.target.dataset.id);
+            const shop = e.target.dataset.shop || 'main';
+            const med = medicines.find(m => m.id === id);
+            
+            if (med) {
+                const amountStr = prompt("Enter amount to add/subtract:", "1");
+                const amount = parseInt(amountStr);
 
-            if (!isNaN(amount) && amount > 0) {
-                if (e.target.classList.contains('plus')) {
-                    med.stock[shop] = (med.stock[shop] || 0) + amount;
-                    logTransaction('in', amount, med.price, shop, med.name);
-                } else if (e.target.classList.contains('minus')) {
-                    if (med.stock[shop] >= amount) {
-                        med.stock[shop] -= amount;
-                        logTransaction('out', amount, med.price, shop, med.name);
-                    } else {
-                        alert("Not enough stock to subtract.");
+                if (!isNaN(amount) && amount > 0) {
+                    if (e.target.classList.contains('plus')) {
+                        med.stock[shop] = (med.stock[shop] || 0) + amount;
+                        logTransaction('in', amount, med.price, shop, med.name);
+                    } else if (e.target.classList.contains('minus')) {
+                        if (med.stock[shop] >= amount) {
+                            med.stock[shop] -= amount;
+                            logTransaction('out', amount, med.price, shop, med.name);
+                        } else {
+                            alert("Not enough stock to subtract.");
+                        }
                     }
+                    const filter = searchBar ? searchBar.value : '';
+                    const group = groupBy ? groupBy.value : 'all';
+                    renderMedicines(filter, group);
+                } else if (amountStr !== null) {
+                    alert("Please enter a valid positive number.");
                 }
-                renderMedicines();
-            } else if (amountStr !== null) { // Don't alert if user cancelled prompt
-                alert("Please enter a valid positive number.");
             }
         }
-    }
-});
+    });
 
-medicineTableBody.addEventListener('change', (e) => {
-    // Handle Stock Change
-    if (e.target.classList.contains('stock-input')) {
-        const id = parseInt(e.target.dataset.id);
-        const shop = e.target.dataset.shop;
-        const med = medicines.find(m => m.id === id);
-        const newStock = parseInt(e.target.value);
+    medicineTableBody.addEventListener('change', (e) => {
+        // Handle Stock Change
+        if (e.target.classList.contains('stock-input')) {
+            const id = parseInt(e.target.dataset.id);
+            const shop = e.target.dataset.shop;
+            const med = medicines.find(m => m.id === id);
+            const newStock = parseInt(e.target.value);
 
-        if (med && shop && !isNaN(newStock) && newStock >= 0) {
-            const diff = newStock - med.stock[shop];
-            if (diff > 0) {
-                logTransaction('in', diff, med.price, shop, med.name);
-            } else if (diff < 0) {
-                logTransaction('out', Math.abs(diff), med.price, shop, med.name);
+            if (med && shop && !isNaN(newStock) && newStock >= 0) {
+                const oldStock = med.stock[shop] || 0;
+                const diff = newStock - oldStock;
+                if (diff > 0) {
+                    logTransaction('in', diff, med.price, shop, med.name);
+                } else if (diff < 0) {
+                    logTransaction('out', Math.abs(diff), med.price, shop, med.name);
+                }
+                med.stock[shop] = newStock;
+                // Update total stock display
+                const totalStock = getTotalStock(med);
+                const row = e.target.closest('tr');
+                const totalStockCell = row.querySelector('td:nth-child(5)');
+                if (totalStockCell) {
+                    totalStockCell.textContent = totalStock;
+                }
+                updateAlertBadge();
             }
-            med.stock[shop] = newStock;
-            renderMedicines();
         }
-    }
-    
-    // Handle Price Change
-    if (e.target.classList.contains('price-input')) {
-        const id = parseInt(e.target.dataset.id);
-        const med = medicines.find(m => m.id === id);
-        const newPrice = parseFloat(e.target.value);
         
-        if (med && !isNaN(newPrice) && newPrice >= 0) {
-            med.price = newPrice.toFixed(2);
-            // No need to re-render entire table, just update value if needed or leave as is
-            // But re-rendering ensures consistency
-            // renderMedicines(); // Optional, might lose focus
+        // Handle Price Change
+        if (e.target.classList.contains('price-input')) {
+            const id = parseInt(e.target.dataset.id);
+            const med = medicines.find(m => m.id === id);
+            const newPrice = parseFloat(e.target.value);
+            
+            if (med && !isNaN(newPrice) && newPrice >= 0) {
+                med.price = newPrice.toFixed(2);
+            }
         }
-    }
-});
+    });
 
-medicineTableBody.addEventListener('input', (e) => {
-    if (e.target.classList.contains('stock-input')) {
-        const input = e.target;
-        const value = input.value;
-        const len = value.length || 1;
-        
-        // Base width + width per character
-        // Using 14px per character, adjust as needed for your font
-        const newWidth = 20 + (len * 14); 
-        
-        // Apply width, but don't let it get smaller than a minimum
-        input.style.width = `${Math.max(120, newWidth)}px`;
-    }
-});
+    medicineTableBody.addEventListener('input', (e) => {
+        if (e.target.classList.contains('stock-input')) {
+            const input = e.target;
+            const value = input.value;
+            const len = value.length || 1;
+            const newWidth = 20 + (len * 14); 
+            input.style.width = `${Math.max(120, newWidth)}px`;
+        }
+    });
+} // End of medicineTableBody check
 
 // Quick Actions
-quickAddBtn.addEventListener('click', () => {
-    addItemModal.classList.add('show');
-});
+if (quickAddBtn) {
+    quickAddBtn.addEventListener('click', () => {
+        if (addItemModal) addItemModal.classList.add('show');
+    });
+}
 
-quickStatsBtn.addEventListener('click', () => {
-    statsBtn.click();
-});
+if (addMedicineBtn) {
+    addMedicineBtn.addEventListener('click', () => {
+        renderShopInputs();
+        if (addItemModal) addItemModal.classList.add('show');
+    });
+}
+
+if (quickStatsBtn) {
+    quickStatsBtn.addEventListener('click', () => {
+        if (statsBtn) statsBtn.click();
+    });
+}
 
 // Modal Logic
-addItemBtn.addEventListener('click', () => {
-    addItemModal.classList.add('show');
-});
+if (addItemBtn) {
+    addItemBtn.addEventListener('click', () => {
+        if (addItemModal) addItemModal.classList.add('show');
+    });
+}
 
-cancelBtn.addEventListener('click', () => {
-    addItemModal.classList.remove('show');
-    addItemForm.reset();
-});
+if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => {
+        if (addItemModal) addItemModal.classList.remove('show');
+        if (addItemForm) addItemForm.reset();
+    });
+}
 
 // Alert Modal Logic
-alertBtn.addEventListener('click', () => {
-    const lowStockMeds = medicines.filter(m => getTotalStock(m) <= m.lowStockThreshold);
-    alertsList.innerHTML = '';
-    if (lowStockMeds.length === 0) {
-        alertsList.innerHTML = '<p>No low stock items.</p>';
-    } else {
-        lowStockMeds.forEach(med => {
-            const div = document.createElement('div');
-            div.className = 'alert-item';
-            
-            // Create breakdown string
-            let breakdown = '';
-            shops.forEach(shop => {
-                const stock = med.stock[shop.id] || 0;
-                breakdown += `<span style="font-size: 0.8em; margin-left: 5px; color: var(--text-secondary);">[${shop.name}: ${stock}]</span>`;
-            });
+if (alertBtn) {
+    alertBtn.addEventListener('click', () => {
+        const lowStockMeds = medicines.filter(m => getTotalStock(m) <= (m.lowStockThreshold || 10));
+        if (alertsList) {
+            alertsList.innerHTML = '';
+            if (lowStockMeds.length === 0) {
+                alertsList.innerHTML = '<p>No low stock items.</p>';
+            } else {
+                lowStockMeds.forEach(med => {
+                    const div = document.createElement('div');
+                    div.className = 'alert-item';
+                    
+                    // Create breakdown string
+                    let breakdown = '';
+                    shops.forEach(shop => {
+                        const stock = med.stock[shop.id] || 0;
+                        breakdown += `<span style="font-size: 0.8em; margin-left: 5px; color: var(--text-secondary);">[${shop.name}: ${stock}]</span>`;
+                    });
 
-            div.innerHTML = `
-                <div style="display: flex; flex-direction: column; width: 100%;">
-                    <div style="display: flex; justify-content: space-between; width: 100%;">
-                        <span>${med.name} (${med.company})</span> 
-                        <span>Total: ${getTotalStock(med)}</span>
-                    </div>
-                    <div style="margin-top: 4px;">
-                        ${breakdown}
-                    </div>
-                </div>
-            `;
-            alertsList.appendChild(div);
-        });
-    }
-    alertsModal.classList.add('show');
-});
+                    div.innerHTML = `
+                        <div style="display: flex; flex-direction: column; width: 100%;">
+                            <div style="display: flex; justify-content: space-between; width: 100%;">
+                                <span>${med.name} (${med.company})</span> 
+                                <span>Total: ${getTotalStock(med)}</span>
+                            </div>
+                            <div style="margin-top: 4px;">
+                                ${breakdown}
+                            </div>
+                        </div>
+                    `;
+                    alertsList.appendChild(div);
+                });
+            }
+        }
+        if (alertsModal) alertsModal.classList.add('show');
+    });
+}
 
-closeAlertsBtn.addEventListener('click', () => {
-    alertsModal.classList.remove('show');
-});
+if (closeAlertsBtn) {
+    closeAlertsBtn.addEventListener('click', () => {
+        if (alertsModal) alertsModal.classList.remove('show');
+    });
+}
 
 // Stats Modal Logic
 function getStats() {
@@ -593,7 +625,6 @@ const statsDayDropdown = document.getElementById('stats-day-dropdown');
 const statsMonthDropdown = document.getElementById('stats-month-dropdown');
 const statsYearDropdown = document.getElementById('stats-year-dropdown');
 const statsManualDate = document.getElementById('stats-manual-date');
-const shopTabsContainer = document.getElementById('shop-tabs-container');
 
 function updateStats() {
     const shop = statsShopSelect ? statsShopSelect.value : 'all';

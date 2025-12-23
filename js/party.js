@@ -20,6 +20,69 @@ const partyCategoryInput = document.getElementById('party-category');
 
 const partyMonthDropdown = document.getElementById('party-month-dropdown');
 const partyYearDropdown = document.getElementById('party-year-dropdown');
+const downloadPartyPdfBtn = document.getElementById('download-party-pdf-btn');
+
+function downloadPartyPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const category = partyCategoryInput.value;
+    const month = parseInt(partyMonthDropdown.value);
+    const year = parseInt(partyYearDropdown.value);
+    const monthName = new Date(year, month - 1, 1).toLocaleString('default', { month: 'long' });
+
+    const title = `${category === 'debtor' ? 'Debtor' : 'Creditor'} List - ${monthName} ${year}`;
+    doc.text(title, 14, 16);
+
+    const filtered = partyTransactions.filter(t => {
+        const tDate = new Date(t.date);
+        return t.category === category &&
+               tDate.getMonth() + 1 === month &&
+               tDate.getFullYear() === year;
+    });
+
+    const head = [['Date', 'Name', 'Type', 'Total Due', 'Paid', 'Present Due']];
+    const body = filtered.map(t => {
+        const tDate = new Date(t.date);
+        const presentDue = t.due - t.paid;
+        return [
+            tDate.toLocaleDateString(),
+            t.name,
+            t.type,
+            `৳${t.due.toFixed(2)}`,
+            `৳${t.paid.toFixed(2)}`,
+            `৳${presentDue.toFixed(2)}`
+        ];
+    });
+
+    let totalDue = filtered.reduce((sum, t) => sum + t.due, 0);
+    let totalPaid = filtered.reduce((sum, t) => sum + t.paid, 0);
+    let totalPresentDue = totalDue - totalPaid;
+
+    body.push([
+        { content: 'Total', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+        { content: `৳${totalDue.toFixed(2)}`, styles: { fontStyle: 'bold' } },
+        { content: `৳${totalPaid.toFixed(2)}`, styles: { fontStyle: 'bold' } },
+        { content: `৳${totalPresentDue.toFixed(2)}`, styles: { fontStyle: 'bold' } }
+    ]);
+
+    doc.autoTable({
+        head: head,
+        body: body,
+        startY: 20,
+        theme: 'grid',
+        headStyles: { fillColor: [0, 137, 123] }, // Teal header
+        didDrawPage: function (data) {
+            // Footer
+            doc.setFontSize(10);
+            doc.text('Page ' + doc.internal.getNumberOfPages(), data.settings.margin.left, doc.internal.pageSize.height - 10);
+            doc.text(new Date().toLocaleDateString(), doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, { align: 'right' });
+        }
+    });
+
+    doc.save(`${category}_report_${year}_${month}.pdf`);
+}
+
 
 function populatePartyYearDropdown() {
     partyYearDropdown.innerHTML = '';
@@ -90,6 +153,7 @@ closePartyModalBtn.addEventListener('click', () => partyModal.classList.remove('
 
 partyMonthDropdown.addEventListener('change', () => renderPartyTransactions(partyCategoryInput.value));
 partyYearDropdown.addEventListener('change', () => renderPartyTransactions(partyCategoryInput.value));
+downloadPartyPdfBtn.addEventListener('click', downloadPartyPDF);
 
 
 addPartyTransactionBtn.addEventListener('click', () => {
@@ -107,10 +171,10 @@ addPartyTransactionForm.addEventListener('submit', (e) => {
         id: Date.now(),
         category: partyCategoryInput.value,
         name: document.getElementById('party-name').value,
-        due: parseFloat(document.getElementById('party-due').value),
-        paid: parseFloat(document.getElementById('party-paid').value),
-        type: document.getElementById('party-type').value,
-        date: new Date().toISOString()
+        due: parseFloat(document.getElementById('party-due').value) || 0,
+        paid: parseFloat(document.getElementById('party-paid').value) || 0,
+        type: document.getElementById('party-transaction-type').value,
+        date: document.getElementById('party-transaction-date').value || new Date().toISOString().split('T')[0]
     };
 
     partyTransactions.push(newTransaction);

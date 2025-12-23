@@ -13,17 +13,17 @@
             <h1 data-i18n="app_title">Medicine Shop</h1>
             <div class="controls">
                 <button id="alert-btn" class="icon-btn" aria-label="Alerts" style="width: auto; padding-right: 1rem;">
-                    ⚠️ <span style="margin-left: 0.5rem; font-size: 0.9rem;">Alerts (সতর্কতা)</span>
+                    ⚠️ <span data-i18n="alerts_btn" style="margin-left: 0.5rem; font-size: 0.9rem;">Alerts</span>
                     <span id="alert-badge" class="badge">0</span>
                 </button>
                 <button id="debtor-btn" class="icon-btn" aria-label="Debtors" style="width: auto; padding-right: 1rem;">
-                    Debtors
+                    <span data-i18n="debtors">Debtors</span>
                 </button>
                 <button id="creditor-btn" class="icon-btn" aria-label="Creditors" style="width: auto; padding-right: 1rem;">
-                    Creditors
+                    <span data-i18n="creditors">Creditors</span>
                 </button>
                 <button id="stats-btn" class="icon-btn" aria-label="Statistics" style="width: auto; padding-right: 1rem;">
-                    📊 <span style="margin-left: 0.5rem; font-size: 0.9rem;">Statistics (পরিসংখ্যান)</span>
+                    📊 <span data-i18n="stats_title" style="margin-left: 0.5rem; font-size: 0.9rem;">Statistics</span>
                 </button>
                 <button id="add-item-btn" class="primary-btn" data-i18n="add_item_btn">Add New Item</button>
                 <button class="lang-btn active" data-lang="en" data-i18n="lang_en">EN</button>
@@ -35,69 +35,56 @@
         </div>
         <div class="search-section">
             <div class="search-wrapper">
-                <input type="text" id="search-bar" placeholder="Search medicine..." data-i18n="search_placeholder">
-                <button class="search-icon-btn">🔍</button>
+                <input type="text" id="search-bar" data-i18n-placeholder="search_placeholder">
+                <button class="search-icon-btn"><i class="fas fa-search"></i></button>
             </div>
             <div class="filter-wrapper">
                 <select id="group-by">
-                    <option value="none">No Grouping</option>
-                    <option value="company">Group by Company</option>
+                    <option value="all" data-i18n="group_by_all">Group by: All</option>
+                    <option value="company" data-i18n="group_by_company">Group by: Company</option>
                 </select>
             </div>
         </div>
     </header>
 
-    <div class="dashboard-stats">
-        <div class="stat-summary-card">
-            <h3>Total Inventory Value</h3>
-            <p id="total-inventory-value" class="stat-highlight">৳0.00</p>
+    <!-- Main Content -->
+    <main>
+        <div class="quick-actions-bar">
+            <button class="labeled-btn" id="add-medicine-btn">
+                <i class="fas fa-plus-circle btn-icon"></i>
+                <span class="btn-label" data-i18n="add_medicine">Add Medicine</span>
+            </button>
+            <button class="labeled-btn" id="add-shop-btn">
+                <i class="fas fa-store btn-icon"></i>
+                <span class="btn-label" data-i18n="add_shop">Add Shop</span>
+            </button>
+            <button class="labeled-btn" id="delete-shop-btn">
+                <i class="fas fa-trash btn-icon"></i>
+                <span class="btn-label" data-i18n="delete_shop">Delete Shop</span>
+            </button>
+            <button class="labeled-btn" id="delete-medicine-btn">
+                <i class="fas fa-times-circle btn-icon"></i>
+                <span class="btn-label" data-i18n="delete_medicine">Delete Medicine</span>
+            </button>
+            <button class="labeled-btn" id="quick-stats-btn">
+                <i class="fas fa-chart-pie btn-icon"></i>
+                <span class="btn-label" data-i18n="view_stats">View Stats</span>
+            </button>
         </div>
-        <div class="stat-summary-card">
-            <h3>Low Stock Alerts</h3>
-            <p id="low-stock-count" class="stat-highlight alert">0 Items</p>
-        </div>
-        <div class="stat-summary-card">
-            <h3>Quick Actions</h3>
-            <div class="quick-actions">
-                <button id="quick-add-btn" class="icon-btn labeled-btn">
-                    <span class="btn-icon">➕</span>
-                    <span class="btn-label" data-i18n="quick_add_med">Add Medicine</span>
-                </button>
-                <button id="add-shop-btn" class="icon-btn labeled-btn">
-                    <span class="btn-icon">🏪</span>
-                    <span class="btn-label" data-i18n="quick_add_shop">Add Shop</span>
-                </button>
-                <button id="delete-shop-btn" class="icon-btn labeled-btn">
-                    <span class="btn-icon">🗑️</span>
-                    <span class="btn-label" data-i18n="quick_delete_shop">Shop</span>
-                </button>
-                <button id="delete-medicine-btn" class="icon-btn labeled-btn">
-                    <span class="btn-icon">💊</span>
-                    <span class="btn-label">Del Med</span>
-                </button>
-                <button id="quick-stats-btn" class="icon-btn labeled-btn">
-                    <span class="btn-icon">📊</span>
-                    <span class="btn-label" data-i18n="quick_stats">Statistics</span>
-                </button>
-            </div>
-        </div>
-    </div>
 
-    <main id="medicine-list-container">
-        <div class="table-wrapper" style="overflow-x: auto;">
+        <div id="medicine-list-container">
             <table id="medicine-table">
-                <thead>
-                    <tr id="table-header-row">
-                        <!-- Headers will be injected by JS -->
-                    </tr>
+                <thead id="medicine-table-head">
+                    <!-- Headers will be rendered here by JavaScript -->
                 </thead>
                 <tbody id="medicine-table-body">
-                    <!-- Rows will be injected here -->
+                    <!-- Medicine rows will be rendered here by JavaScript -->
                 </tbody>
             </table>
         </div>
     </main>
 
+    <!-- Modals -->
     <!-- Add Item Modal -->
     <div id="add-item-modal" class="modal">
         <div class="modal-content">
@@ -290,8 +277,14 @@
     <!-- Debtor/Creditor Modal -->
     <div id="party-modal" class="modal">
         <div class="modal-content party-modal-content">
+            <div class="modal-header">
+                <h2 id="party-modal-title">Debtors</h2>
+                <div>
+                    <button id="download-party-pdf-btn" class="secondary-btn" data-i18n="download_pdf">Download PDF</button>
+                    <button id="add-party-transaction-btn" class="primary-btn" data-i18n="add_transaction">Add Transaction</button>
+                </div>
+            </div>
             <div class="stats-controls" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
-                <h3 style="margin-right: auto; font-size: 1.1rem;" id="party-modal-title">Debtors</h3>
                 
                 <div class="date-filter-group">
                     <!-- Month Dropdown -->
@@ -315,8 +308,6 @@
                         <!-- Populated by JS -->
                     </select>
                 </div>
-
-                <button id="add-party-transaction-btn" class="primary-btn">Add New Transaction</button>
             </div>
             <div class="party-list">
                 <div class="party-item party-header">
@@ -357,10 +348,15 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="party-type">Type</label>
-                    <select id="party-type">
-                        <option value="cash">Cash</option>
-                        <option value="bank">Bank</option>
+                    <label for="party-transaction-date" data-i18n="date">Date</label>
+                    <input type="date" id="party-transaction-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="party-transaction-type" data-i18n="party_type">Type</label>
+                    <select id="party-transaction-type" required>
+                        <option value="Cash">Cash</option>
+                        <option value="Agrani Bank">Agrani Bank</option>
+                        <option value="Brac Bank">Brac Bank</option>
                     </select>
                 </div>
                 <input type="hidden" id="party-category">
@@ -374,10 +370,9 @@
 
     <!-- PDF Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
-    <script src="js/party.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf-autotable.min.js"></script>
     <script src="js/lang.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/party.js"></script>
 </body>
 </html>
