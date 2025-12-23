@@ -311,12 +311,12 @@
             </div>
             <div class="party-list">
                 <div class="party-item party-header">
-                    <span>Party Name</span>
-                    <span>Total Due</span>
-                    <span>Paid Amount</span>
-                    <span>Present Due</span>
-                    <span>Type</span>
-                    <span>Date</span>
+                    <span data-i18n="party_name">Party Name</span>
+                    <span data-i18n="total_due">Total Due</span>
+                    <span data-i18n="paid_amount">Paid Amount</span>
+                    <span data-i18n="present_due">Present Due</span>
+                    <span data-i18n="created_date">Created</span>
+                    <span data-i18n="actions">Actions</span>
                 </div>
                 <div id="party-list-body">
                     <!-- Party transactions will be injected here -->
@@ -328,43 +328,93 @@
         </div>
     </div>
 
-    <!-- Add Party Transaction Modal -->
+    <!-- Add New Party Modal -->
     <div id="add-party-transaction-modal" class="modal">
         <div class="modal-content">
-            <h2>Add Party Transaction</h2>
+            <h2 id="add-party-modal-title">Add New Party</h2>
             <form id="add-party-transaction-form">
                 <div class="form-group">
                     <label for="party-name">Party Name</label>
                     <input type="text" id="party-name" required>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="party-due">Total Due</label>
-                        <input type="number" id="party-due" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="party-paid">Paid Amount</label>
-                        <input type="number" id="party-paid" step="0.01" required>
-                    </div>
+                <div class="form-group">
+                    <label for="party-due">Total Due Amount (৳)</label>
+                    <input type="number" id="party-due" step="0.01" required>
                 </div>
                 <div class="form-group">
                     <label for="party-transaction-date" data-i18n="date">Date</label>
                     <input type="date" id="party-transaction-date" required>
                 </div>
-                <div class="form-group">
-                    <label for="party-transaction-type" data-i18n="party_type">Type</label>
-                    <select id="party-transaction-type" required>
-                        <option value="Cash">Cash</option>
-                        <option value="Agrani Bank">Agrani Bank</option>
-                        <option value="Brac Bank">Brac Bank</option>
-                    </select>
-                </div>
                 <input type="hidden" id="party-category">
+                <input type="hidden" id="party-edit-id">
                 <div class="form-actions">
                     <button type="button" id="cancel-add-party-transaction-btn" class="secondary-btn">Cancel</button>
-                    <button type="submit" class="primary-btn">Save Transaction</button>
+                    <button type="submit" class="primary-btn">Save</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Add Payment Modal -->
+    <div id="add-payment-modal" class="modal">
+        <div class="modal-content">
+            <h2>Add Payment - <span id="payment-party-name"></span></h2>
+            <form id="add-payment-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="present_due">Present Due</label>
+                        <input type="text" id="payment-present-due" readonly class="readonly-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-amount">Payment Amount (৳)</label>
+                        <input type="number" id="payment-amount" step="0.01" required min="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="payment-date">Payment Date</label>
+                        <input type="date" id="payment-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-type">Payment Type</label>
+                        <select id="payment-type" required>
+                            <option value="Cash">Cash</option>
+                            <option value="Agrani Bank">Agrani Bank</option>
+                            <option value="Brac Bank">Brac Bank</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" id="payment-party-id">
+                <div class="form-actions">
+                    <button type="button" id="cancel-payment-btn" class="secondary-btn">Cancel</button>
+                    <button type="submit" class="primary-btn">Add Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment History Modal -->
+    <div id="payment-history-modal" class="modal">
+        <div class="modal-content modal-lg">
+            <h2>Payment History - <span id="history-party-name"></span></h2>
+            <div class="payment-history-summary">
+                <div><strong data-i18n="total_due">Total Due:</strong> <span id="history-total-due">৳0</span></div>
+                <div><strong data-i18n="paid_amount">Total Paid:</strong> <span id="history-total-paid">৳0</span></div>
+                <div><strong data-i18n="present_due">Present Due:</strong> <span id="history-present-due">৳0</span></div>
+            </div>
+            <div class="payment-history-list">
+                <div class="party-item party-header" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <span data-i18n="date">Date</span>
+                    <span>Amount</span>
+                    <span data-i18n="party_type">Type</span>
+                </div>
+                <div id="payment-history-body">
+                    <!-- Payment history will be injected here -->
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="close-history-btn" class="secondary-btn">Close</button>
+            </div>
         </div>
     </div>
 

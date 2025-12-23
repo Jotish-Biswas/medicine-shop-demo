@@ -53,5 +53,12 @@
     "party_type": "Type",
     "date": "Date",
     "del_med_title": "Delete Medicine",
-    "alerts_btn": "Alerts"
+    "alerts_btn": "Alerts",
+    "type_none": "None",
+    "type_cash": "Cash",
+    "btn_pay": "Pay",
+    "btn_history": "History",
+    "btn_delete": "Delete",
+    "created_date": "Created",
+    "actions": "Actions"
 }

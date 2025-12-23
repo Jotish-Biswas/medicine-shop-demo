@@ -53,5 +53,12 @@
     "party_type": "ধরন",
     "date": "তারিখ",
     "del_med_title": "ঔষধ মুছুন",
-    "alerts_btn": "সতর্কতা"
+    "alerts_btn": "সতর্কতা",
+    "type_none": "নেই",
+    "type_cash": "নগদ",
+    "btn_pay": "পরিশোধ",
+    "btn_history": "ইতিহাস",
+    "btn_delete": "মুছুন",
+    "created_date": "তারিখ",
+    "actions": "কার্যকরী"
 }
