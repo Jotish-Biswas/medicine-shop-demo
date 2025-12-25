@@ -4,6 +4,25 @@
 const SUPABASE_URL = 'https://pmassayjacceepanxbkt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYXNzYXlqYWNjZWVwYW54Ymt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NTU2MTMsImV4cCI6MjA4MjIzMTYxM30.-TjfMNsXU7exNsLKBxb3SbNF4uFK5o8NghA43V8m4b0';
 
+// =============================================
+// AUTH CHECK - Redirect to login if not logged in
+// =============================================
+(function checkAuth() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn !== 'true') {
+        window.location.replace('login.html');
+        return;
+    }
+})();
+
+// Prevent back button after logout
+window.addEventListener('pageshow', function(event) {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn !== 'true') {
+        window.location.replace('login.html');
+    }
+});
+
 // Use existing supabase client or create new one
 let supabaseClient;
 if (typeof supabase !== 'undefined' && supabase.from) {
@@ -49,7 +68,8 @@ if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('loggedInUser');
-        window.location.href = 'login.html';
+        // Use replace to prevent back button from returning
+        window.location.replace('login.html');
     });
 }
 
