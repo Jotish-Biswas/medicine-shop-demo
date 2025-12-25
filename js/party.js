@@ -64,64 +64,145 @@ const paymentHistoryModal = document.getElementById('payment-history-modal');
 const closeHistoryBtn = document.getElementById('close-history-btn');
 
 function downloadPartyPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    const category = partyCategoryInput.value;
-    const month = parseInt(partyMonthDropdown.value);
-    const year = parseInt(partyYearDropdown.value);
-    const monthName = new Date(year, month - 1, 1).toLocaleString('default', { month: 'long' });
-
-    const title = `${category === 'debtor' ? 'Debtor' : 'Creditor'} List - ${monthName} ${year}`;
-    doc.text(title, 14, 16);
-
-    const filtered = partyTransactions.filter(t => {
-        const tDate = new Date(t.createdDate);
-        return t.category === category &&
-               tDate.getMonth() + 1 === month &&
-               tDate.getFullYear() === year;
-    });
-
-    const head = [['Name', 'Total Due', 'Paid', 'Present Due', 'Created Date']];
-    const body = filtered.map(t => {
-        const tDate = new Date(t.createdDate);
-        const totalPaid = getTotalPaid(t);
-        const presentDue = t.due - totalPaid;
-        return [
-            t.name,
-            `৳${t.due.toFixed(2)}`,
-            `৳${totalPaid.toFixed(2)}`,
-            `৳${presentDue.toFixed(2)}`,
-            tDate.toLocaleDateString()
-        ];
-    });
-
-    let totalDue = filtered.reduce((sum, t) => sum + t.due, 0);
-    let totalPaid = filtered.reduce((sum, t) => sum + getTotalPaid(t), 0);
-    let totalPresentDue = totalDue - totalPaid;
-
-    body.push([
-        { content: 'Total', styles: { fontStyle: 'bold', halign: 'right' } },
-        { content: `৳${totalDue.toFixed(2)}`, styles: { fontStyle: 'bold' } },
-        { content: `৳${totalPaid.toFixed(2)}`, styles: { fontStyle: 'bold' } },
-        { content: `৳${totalPresentDue.toFixed(2)}`, styles: { fontStyle: 'bold' } },
-        ''
-    ]);
-
-    doc.autoTable({
-        head: head,
-        body: body,
-        startY: 20,
-        theme: 'grid',
-        headStyles: { fillColor: [0, 137, 123] },
-        didDrawPage: function (data) {
-            doc.setFontSize(10);
-            doc.text('Page ' + doc.internal.getNumberOfPages(), data.settings.margin.left, doc.internal.pageSize.height - 10);
-            doc.text(new Date().toLocaleDateString(), doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, { align: 'right' });
+    try {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            alert("PDF library not loaded. Please refresh the page.");
+            return;
         }
-    });
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-    doc.save(`${category}_report_${year}_${month}.pdf`);
+        const category = partyCategoryInput.value;
+        const month = parseInt(partyMonthDropdown.value);
+        const year = parseInt(partyYearDropdown.value);
+        const monthName = new Date(year, month - 1, 1).toLocaleString('default', { month: 'long' });
+
+        const categoryName = category === 'debtor' ? 'Debtor' : 'Creditor';
+        const title = `${categoryName} Report - ${monthName} ${year}`;
+        
+        doc.setFontSize(18);
+        doc.text(title, 14, 16);
+
+        const filtered = partyTransactions.filter(t => {
+            const tDate = new Date(t.createdDate);
+            return t.category === category &&
+                   tDate.getMonth() + 1 === month &&
+                   tDate.getFullYear() === year;
+        });
+
+        if (filtered.length === 0) {
+            alert("No data found for the selected period.");
+            return;
+        }
+
+        let yPos = 30;
+        let grandTotalDue = 0;
+        let grandTotalPaid = 0;
+
+        // Loop through each party and show their transactions
+        filtered.forEach((party, index) => {
+            const totalPaid = getTotalPaid(party);
+            const presentDue = party.due - totalPaid;
+            
+            grandTotalDue += party.due;
+            grandTotalPaid += totalPaid;
+
+            // Check if need new page
+            if (yPos > 250) {
+                doc.addPage();
+                yPos = 20;
+            }
+
+            // Party Name Header
+            doc.setFillColor(0, 137, 123);
+            doc.rect(14, yPos - 5, 182, 10, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text(`${index + 1}. ${party.name}`, 16, yPos + 2);
+            doc.text(`Total Due: Tk ${party.due.toFixed(2)}`, 120, yPos + 2);
+            
+            yPos += 12;
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+
+            // Created Date
+            const createdDate = new Date(party.createdDate).toLocaleDateString();
+            doc.text(`Created: ${createdDate}`, 16, yPos);
+            doc.text(`Present Due: Tk ${presentDue.toFixed(2)}`, 120, yPos);
+            yPos += 8;
+
+            // Payment History Header
+            if (party.payments && party.payments.length > 0) {
+                doc.setFillColor(240, 240, 240);
+                doc.rect(14, yPos - 3, 182, 7, 'F');
+                doc.setFont(undefined, 'bold');
+                doc.text('Date', 16, yPos + 2);
+                doc.text('Amount', 60, yPos + 2);
+                doc.text('Type', 100, yPos + 2);
+                doc.text('Bill No.', 140, yPos + 2);
+                yPos += 10;
+                doc.setFont(undefined, 'normal');
+
+                // Payment rows
+                party.payments.forEach(payment => {
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    
+                    const payDate = new Date(payment.date).toLocaleDateString();
+                    doc.text(payDate, 16, yPos);
+                    doc.text(`Tk ${payment.amount.toFixed(2)}`, 60, yPos);
+                    doc.text(payment.type || 'Cash', 100, yPos);
+                    doc.text(payment.billNumber || '-', 140, yPos);
+                    yPos += 7;
+                });
+
+                // Subtotal for this party
+                doc.setFont(undefined, 'bold');
+                doc.text(`Total Paid: Tk ${totalPaid.toFixed(2)}`, 60, yPos);
+                yPos += 5;
+            } else {
+                doc.setTextColor(150, 150, 150);
+                doc.text('No payments recorded', 16, yPos);
+                doc.setTextColor(0, 0, 0);
+                yPos += 5;
+            }
+
+            // Separator line
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, yPos, 196, yPos);
+            yPos += 10;
+        });
+
+        // Grand Total at the end
+        if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
+        doc.setFillColor(0, 100, 80);
+        doc.rect(14, yPos - 3, 182, 12, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('GRAND TOTAL', 16, yPos + 5);
+        doc.text(`Due: Tk ${grandTotalDue.toFixed(2)}`, 70, yPos + 5);
+        doc.text(`Paid: Tk ${grandTotalPaid.toFixed(2)}`, 120, yPos + 5);
+        doc.text(`Balance: Tk ${(grandTotalDue - grandTotalPaid).toFixed(2)}`, 160, yPos + 5);
+
+        // Save with proper filename
+        const fileName = `${categoryName}_${monthName}_${year}.pdf`;
+        doc.save(fileName);
+        console.log('PDF saved:', fileName);
+        console.log('✅ Party PDF downloaded successfully');
+    } catch (err) {
+        console.error('Party PDF error:', err);
+        alert('Failed to generate PDF: ' + err.message);
+    }
 }
 
 function populatePartyYearDropdown() {

@@ -889,7 +889,13 @@ function renderStockMovementReport(shopFilter = 'all', month = null, year = null
     if (!year) year = now.getFullYear();
 
     // Filter transactions for the selected month/year and shop
+    // Also filter out transactions without valid medicine name
     const filteredTransactions = transactions.filter(t => {
+        // Skip if no medicine name or unknown
+        if (!t.medicineName || t.medicineName === 'Unknown' || t.medicineName.trim() === '') {
+            return false;
+        }
+        
         const tDate = new Date(t.date);
         const isSameMonth = tDate.getFullYear() === parseInt(year) && (tDate.getMonth() + 1) === parseInt(month);
         const isSameShop = shopFilter === 'all' || t.shop === shopFilter;
@@ -922,11 +928,12 @@ function renderStockMovementReport(shopFilter = 'all', month = null, year = null
 
         if (med) {
             if (shopFilter === 'all') {
-                presentStock = med.stock.main + med.stock.a + med.stock.b + med.stock.c + med.stock.d + med.stock.e;
+                // Calculate total from all shops
+                presentStock = Object.values(med.stock || {}).reduce((sum, qty) => sum + (qty || 0), 0);
             } else {
                 presentStock = med.stock[shopFilter] || 0;
             }
-            if (presentStock < med.lowStockThreshold) {
+            if (presentStock < (med.lowStockThreshold || 10)) {
                 lowStockWarning = '<span title="Low Stock">⚠️</span>';
             }
         }
@@ -942,7 +949,7 @@ function renderStockMovementReport(shopFilter = 'all', month = null, year = null
 
         row.innerHTML = `
             <td style="padding: 1rem; text-align: center; color: var(--text-secondary); font-weight: 500;">${day}</td>
-            <td style="padding: 1rem; font-weight: 500;">${t.medicineName || 'Unknown'}</td>
+            <td style="padding: 1rem; font-weight: 500;">${t.medicineName}</td>
             <td style="padding: 1rem; text-align: center; ${addedStyle}">${added}</td>
             <td style="padding: 1rem; text-align: center; ${outStyle}">${out}</td>
             <td style="padding: 1rem; text-align: center; font-weight: bold;">${presentStock} ${lowStockWarning}</td>
@@ -1127,48 +1134,112 @@ if (downloadPdfBtn) {
             const doc = new jsPDF();
             
             // Get values with fallbacks
+            const shopValue = statsShopSelect ? statsShopSelect.value : 'all';
             const shopName = statsShopSelect ? 
                 (statsShopSelect.options[statsShopSelect.selectedIndex]?.text || 'All Shops') : 'All Shops';
             const monthName = statsMonthDropdown ? 
-                (statsMonthDropdown.options[statsMonthDropdown.selectedIndex]?.text || 'Unknown') : 'Unknown';
+                (statsMonthDropdown.options[statsMonthDropdown.selectedIndex]?.text || '') : '';
+            const monthNum = statsMonthDropdown ? statsMonthDropdown.value : (new Date().getMonth() + 1);
             const year = statsYearDropdown ? (statsYearDropdown.value || new Date().getFullYear()) : new Date().getFullYear();
             
             doc.setFontSize(18);
             doc.text(`Stock Movement Report`, 14, 22);
             
             doc.setFontSize(12);
-            doc.text(`Shop: ${shopName}`, 14, 32);
-            doc.text(`Period: ${monthName} ${year}`, 14, 38);
+            doc.text(`Period: ${monthName} ${year}`, 14, 32);
             
-            // Check if table exists
-            const statsTable = document.getElementById('stats-table');
-            if (!statsTable) {
-                alert("No data to export. Please view statistics first.");
-                return;
-            }
+            let yPos = 45;
             
-            // Try autoTable first, fallback to manual if not available
-            if (typeof doc.autoTable === 'function') {
-                doc.autoTable({
-                    html: '#stats-table',
-                    startY: 45,
-                    theme: 'grid',
-                    headStyles: { fillColor: [0, 137, 123] },
-                    styles: { fontSize: 10, cellPadding: 3 },
-                    columnStyles: {
-                        0: { cellWidth: 20 },
-                        1: { cellWidth: 'auto' },
-                        2: { cellWidth: 25, halign: 'center' },
-                        3: { cellWidth: 25, halign: 'center' },
-                        4: { cellWidth: 30, halign: 'center' }
+            // If "All Shops" is selected, create separate sections for each shop
+            if (shopValue === 'all') {
+                const allShops = getShops();
+                
+                allShops.forEach((shop, shopIndex) => {
+                    // Filter transactions for this shop
+                    const shopTransactions = transactions.filter(t => {
+                        const tDate = new Date(t.date);
+                        return t.shop === shop.id &&
+                               (tDate.getMonth() + 1) === parseInt(monthNum) &&
+                               tDate.getFullYear() === parseInt(year);
+                    });
+                    
+                    if (shopTransactions.length === 0) return;
+                    
+                    // Check if need new page
+                    if (yPos > 240) {
+                        doc.addPage();
+                        yPos = 20;
                     }
+                    
+                    // Shop Header
+                    doc.setFillColor(0, 137, 123);
+                    doc.rect(14, yPos - 5, 182, 10, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(shop.name, 16, yPos + 2);
+                    yPos += 15;
+                    
+                    // Table Header
+                    doc.setFillColor(240, 240, 240);
+                    doc.rect(14, yPos - 4, 182, 8, 'F');
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(10);
+                    doc.text('Day', 16, yPos + 1);
+                    doc.text('Medicine', 35, yPos + 1);
+                    doc.text('In', 110, yPos + 1);
+                    doc.text('Out', 130, yPos + 1);
+                    doc.text('Stock', 155, yPos + 1);
+                    yPos += 10;
+                    
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(9);
+                    
+                    // Sort by date
+                    shopTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    shopTransactions.forEach(t => {
+                        if (yPos > 270) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        
+                        const tDate = new Date(t.date);
+                        const day = tDate.getDate();
+                        const medName = t.medicineName ? t.medicineName.substring(0, 35) : '-';
+                        const inQty = t.type === 'in' ? `+${t.quantity}` : '-';
+                        const outQty = t.type === 'out' ? `-${t.quantity}` : '-';
+                        
+                        // Find current stock
+                        const med = medicines.find(m => m.name === t.medicineName);
+                        const currentStock = med ? (med.stock[shop.id] || 0) : '-';
+                        
+                        doc.text(String(day), 16, yPos);
+                        doc.text(medName, 35, yPos);
+                        doc.setTextColor(0, 137, 123);
+                        doc.text(inQty, 110, yPos);
+                        doc.setTextColor(220, 38, 38);
+                        doc.text(outQty, 130, yPos);
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(String(currentStock), 155, yPos);
+                        
+                        yPos += 7;
+                    });
+                    
+                    yPos += 10;
                 });
             } else {
-                // Manual table generation fallback
-                console.log('autoTable not available, using manual method');
+                // Single shop - use existing table
+                doc.text(`Shop: ${shopName}`, 14, 38);
+                
+                const statsTable = document.getElementById('stats-table');
+                if (!statsTable) {
+                    alert("No data to export. Please view statistics first.");
+                    return;
+                }
                 
                 const rows = statsTable.querySelectorAll('tr');
-                let yPos = 50;
+                yPos = 50;
                 const lineHeight = 8;
                 const colWidths = [20, 60, 25, 25, 30];
                 const startX = 14;
@@ -1177,7 +1248,6 @@ if (downloadPdfBtn) {
                     const cells = row.querySelectorAll('th, td');
                     let xPos = startX;
                     
-                    // Header row styling
                     if (rowIndex === 0) {
                         doc.setFillColor(0, 137, 123);
                         doc.rect(startX, yPos - 5, 160, lineHeight, 'F');
@@ -1196,7 +1266,6 @@ if (downloadPdfBtn) {
                     
                     yPos += lineHeight;
                     
-                    // Add new page if needed
                     if (yPos > 270) {
                         doc.addPage();
                         yPos = 20;
@@ -1204,8 +1273,10 @@ if (downloadPdfBtn) {
                 });
             }
             
-            doc.save(`stock_report_${shopName}_${monthName}_${year}.pdf`);
-            console.log('✅ PDF downloaded successfully');
+            // Filename: ShopName_MonthName_Year.pdf
+            const fileName = `Stock_${shopName.replace(/\s+/g, '_')}_${monthName}_${year}.pdf`;
+            doc.save(fileName);
+            console.log('PDF saved:', fileName);
         } catch (err) {
             console.error('PDF generation error:', err);
             alert('Failed to generate PDF: ' + err.message);
