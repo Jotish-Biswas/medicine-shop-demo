@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Medicine Shop</title>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <style>
+        :root {
+            --login-page-bg: #F8FAFC;
+            --login-form-bg: #FFFFFF;
+            --login-btn-color: #2563EB;
+            --login-btn-hover: #1D4ED8;
+            --login-text: #1E293B;
+            --login-text-secondary: #64748B;
+            --login-border: #E2E8F0;
+            --login-input-bg: #F8FAFC;
+        }
+
+        [data-theme="dark"] {
+            --login-page-bg: #0F172A;
+            --login-form-bg: #1E293B;
+            --login-btn-color: #3B82F6;
+            --login-btn-hover: #2563EB;
+            --login-text: #F1F5F9;
+            --login-text-secondary: #94A3B8;
+            --login-border: #334155;
+            --login-input-bg: #0F172A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: var(--login-page-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        /* Animated Background Shapes */
+        .bg-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--login-btn-color);
+            opacity: 0.05;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -5s;
+        }
+
+        .shape:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            left: 10%;
+            animation-delay: -10s;
+        }
+
+        .shape:nth-child(4) {
+            width: 150px;
+            height: 150px;
+            bottom: 20%;
+            right: 10%;
+            animation-delay: -15s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+
+        /* Floating Pills Animation */
+        .floating-pills {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .pill {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .login-container {
+            background: var(--login-form-bg);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            border: 1px solid var(--login-border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .login-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.35);
+        }
+
+        .login-header {
+            background: var(--login-btn-color);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .login-body {
+            padding: 2rem;
+        }
+
+        .login-form .form-group,
+        .forgot-form .form-group,
+        .reset-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .login-form label,
+        .forgot-form label,
+        .reset-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--login-text);
+            font-size: 0.9rem;
+        }
+
+        .login-form input,
+        .forgot-form input,
+        .reset-form input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid var(--login-border);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: var(--login-input-bg);
+            color: var(--login-text);
+            transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+        }
+
+        .login-form input:hover,
+        .forgot-form input:hover,
+        .reset-form input:hover {
+            border-color: var(--login-btn-color);
+            background: var(--login-form-bg);
+        }
+
+        .login-form input:focus,
+        .forgot-form input:focus,
+        .reset-form input:focus {
+            outline: none;
+            border-color: var(--login-btn-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+            background: var(--login-form-bg);
+        }
+
+        .login-form input::placeholder,
+        .forgot-form input::placeholder,
+        .reset-form input::placeholder {
+            color: var(--login-text-secondary);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--login-btn-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .login-btn:hover {
+            background: var(--login-btn-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5);
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .forgot-password-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--login-btn-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password-link:hover {
+            text-decoration: underline;
+            color: var(--login-btn-hover);
+        }
+
+        .error-message {
+            background: #FEF2F2;
+            color: #DC2626;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+            border: 1px solid #FECACA;
+        }
+
+        .success-message {
+            background: #F0FDF4;
+            color: #16A34A;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+            border: 1px solid #BBF7D0;
+        }
+
+        [data-theme="dark"] .error-message {
+            background: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        [data-theme="dark"] .success-message {
+            background: rgba(22, 163, 74, 0.15);
+            border-color: rgba(22, 163, 74, 0.3);
+        }
+
+        [data-theme="dark"] .success-message {
+            background: rgba(22, 163, 74, 0.15);
+            border-color: rgba(22, 163, 74, 0.3);
+        }
+
+        .lang-switch {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .lang-switch .lang-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--login-border);
+            background: var(--login-form-bg);
+            color: var(--login-text);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .lang-switch .lang-btn.active {
+            background: var(--login-btn-color);
+            color: white;
+            border-color: var(--login-btn-color);
+        }
+
+        .theme-toggle-login {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--login-form-bg);
+            border: 1px solid var(--login-border);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: var(--login-text);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .theme-toggle-login:hover {
+            background: var(--login-btn-color);
+            color: white;
+            border-color: var(--login-btn-color);
+        }
+
+        /* Forgot Password Form */
+        .forgot-form {
+            display: none;
+        }
+
+        .back-to-login {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--login-text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .back-to-login:hover {
+            color: var(--login-btn-color);
+        }
+
+        /* OTP Input */
+        .otp-input-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .otp-input {
+            width: 50px !important;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem !important;
+            font-weight: bold;
+            padding: 0 !important;
+        }
+
+        .otp-sent-message {
+            text-align: center;
+            color: var(--login-text);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .otp-sent-message strong {
+            color: var(--login-btn-color);
+        }
+
+        /* Reset Password Form */
+        .reset-form {
+            display: none;
+        }
+
+        .demo-notice {
+            background: #FEF3C7;
+            color: #D97706;
+            padding: 0.8rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            border: 1px solid #FDE68A;
+        }
+
+        [data-theme="dark"] .demo-notice {
+            background: rgba(217, 119, 6, 0.15);
+            border-color: rgba(217, 119, 6, 0.3);
+        }
+
+        .login-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Form instruction text */
+        .forgot-form p,
+        .reset-form p,
+        .form-instruction {
+            color: var(--login-text);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Shapes -->
+    <div class="bg-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    
+    <!-- Floating Pills Background -->
+    <div class="floating-pills" id="floating-pills"></div>
+    
+    <button class="theme-toggle-login" id="theme-toggle-login">🌙 Theme</button>
+    
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-icon">💊</div>
+            <h1 data-i18n="login_title">Medicine Shop</h1>
+            
+        </div>
+        
+        <div class="login-body">
+            <!-- Language Switch -->
+            <div class="lang-switch">
+                <button class="lang-btn active" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="bn">বাংলা</button>
+            </div>
+            <!-- Login Form -->
+            <form class="login-form" id="login-form">
+                <div class="error-message" id="login-error"></div>
+                
+                <div class="form-group">
+                    <label for="email" data-i18n="login_email">Email</label>
+                    <input type="email" id="email" placeholder="example@gmail.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" data-i18n="login_password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required minlength="4">
+                </div>
+                
+                <button type="submit" class="login-btn" data-i18n="login_btn">Login</button>
+                
+                <a class="forgot-password-link" id="show-forgot" data-i18n="forgot_password">Forgot Password?</a>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form class="forgot-form" id="forgot-form">
+                <div class="error-message" id="forgot-error"></div>
+                <div class="success-message" id="forgot-success"></div>
+                
+                <p class="form-instruction" style="text-align: center; margin-bottom: 1rem;" data-i18n="forgot_instruction">
+                    Enter your email to receive a verification code.
+                </p>
+                
+                <div class="form-group">
+                    <label for="forgot-email" data-i18n="login_email">Email</label>
+                    <input type="email" id="forgot-email" placeholder="example@gmail.com" required>
+                </div>
+                
+                <button type="submit" class="login-btn" id="send-code-btn" data-i18n="send_code_btn">Send Code</button>
+                
+                <a class="back-to-login" id="back-to-login-1" data-i18n="back_to_login">← Back to Login</a>
+            </form>
+
+            <!-- OTP Verification Form -->
+            <form class="forgot-form" id="otp-form" style="display: none;">
+                <div class="error-message" id="otp-error"></div>
+                
+                <div class="success-message" style="display: block;" data-i18n="otp_sent_success">
+                    ✅ Verification code sent to your email!
+                </div>
+                
+                <p class="otp-sent-message">
+                    <span data-i18n="otp_sent_to">Code sent to: </span>
+                    <strong id="otp-email-display"></strong>
+                </p>
+                
+                <div class="form-group">
+                    <label for="otp-code" data-i18n="enter_otp">Enter Verification Code</label>
+                    <input type="text" id="otp-code" placeholder="Enter 6-digit code" required pattern="[0-9]{6}" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 0.5rem;">
+                </div>
+                
+                <button type="submit" class="login-btn" data-i18n="verify_btn">Verify</button>
+                
+                <a class="back-to-login" id="back-to-login-2" data-i18n="back_to_login">← Back to Login</a>
+            </form>
+
+            <!-- Reset Password Form -->
+            <form class="reset-form" id="reset-form">
+                <div class="error-message" id="reset-error"></div>
+                <div class="success-message" id="reset-success"></div>
+                
+                <p class="form-instruction" style="text-align: center; margin-bottom: 1rem;" data-i18n="reset_instruction">
+                    Enter your new password.
+                </p>
+                
+                <div class="form-group">
+                    <label for="new-password" data-i18n="new_password">New Password</label>
+                    <input type="password" id="new-password" placeholder="••••••••" required minlength="4">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password" data-i18n="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm-password" placeholder="••••••••" required minlength="4">
+                </div>
+                
+                <button type="submit" class="login-btn" data-i18n="reset_password_btn">Reset Password</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // SUPABASE CONFIGURATION
+        // =============================================
+        const SUPABASE_URL = 'https://pmassayjacceepanxbkt.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_0yzWWlhaciJs8LYYjrlkcw_-ethAqLx';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // =============================================
+        // EMAILJS CONFIGURATION
+        // =============================================
+        const EMAILJS_SERVICE_ID = 'service_qcdbwnb';
+        const EMAILJS_TEMPLATE_ID = 'template_gcxgxjj';
+        const EMAILJS_PUBLIC_KEY = 'TjkYlfoBu1ks-Ewea';
+
+        // Initialize EmailJS
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+
+        // =============================================
+        // TRANSLATIONS
+        // =============================================
+        const translations = {
+            en: {
+                login_title: "Medicine Shop",
+                login_subtitle: "Inventory Management System",
+                login_email: "Email",
+                login_password: "Password",
+                login_btn: "Login",
+                logging_in: "Logging in...",
+                forgot_password: "Forgot Password?",
+                forgot_instruction: "Enter your email to receive a verification code.",
+                send_code_btn: "Send Code",
+                sending_code: "Sending...",
+                back_to_login: "← Back to Login",
+                otp_sent_to: "Code sent to: ",
+                otp_sent_success: "✅ Verification code sent to your email!",
+                enter_otp: "Enter Verification Code",
+                verify_btn: "Verify",
+                reset_instruction: "Enter your new password.",
+                new_password: "New Password",
+                confirm_password: "Confirm Password",
+                reset_password_btn: "Reset Password",
+                error_invalid_credentials: "Invalid email or password!",
+                error_email_not_found: "This email is not registered!",
+                error_invalid_otp: "Invalid verification code!",
+                error_password_mismatch: "Passwords do not match!",
+                error_email_failed: "Failed to send email. Please try again.",
+                success_code_sent: "Verification code sent successfully!",
+                success_password_reset: "Password reset successfully! Redirecting to login..."
+            },
+            bn: {
+                login_title: "ঔষধের দোকান",
+                login_subtitle: "ইনভেন্টরি ম্যানেজমেন্ট সিস্টেম",
+                login_email: "ইমেইল",
+                login_password: "পাসওয়ার্ড",
+                login_btn: "লগইন",
+                forgot_password: "পাসওয়ার্ড ভুলে গেছেন?",
+                logging_in: "লগইন হচ্ছে...",
+                forgot_instruction: "ভেরিফিকেশন কোড পেতে আপনার ইমেইল দিন।",
+                send_code_btn: "কোড পাঠান",
+                sending_code: "পাঠানো হচ্ছে...",
+                back_to_login: "← লগইনে ফিরুন",
+                otp_sent_to: "কোড পাঠানো হয়েছে: ",
+                otp_sent_success: "✅ ভেরিফিকেশন কোড আপনার ইমেইলে পাঠানো হয়েছে!",
+                enter_otp: "ভেরিফিকেশন কোড দিন",
+                verify_btn: "যাচাই করুন",
+                reset_instruction: "আপনার নতুন পাসওয়ার্ড দিন।",
+                new_password: "নতুন পাসওয়ার্ড",
+                confirm_password: "পাসওয়ার্ড নিশ্চিত করুন",
+                reset_password_btn: "পাসওয়ার্ড রিসেট",
+                error_invalid_credentials: "ভুল ইমেইল বা পাসওয়ার্ড!",
+                error_email_not_found: "এই ইমেইল রেজিস্টার্ড নয়!",
+                error_invalid_otp: "ভুল ভেরিফিকেশন কোড!",
+                error_password_mismatch: "পাসওয়ার্ড মিলছে না!",
+                error_email_failed: "ইমেইল পাঠাতে ব্যর্থ। আবার চেষ্টা করুন।",
+                success_code_sent: "ভেরিফিকেশন কোড সফলভাবে পাঠানো হয়েছে!",
+                success_password_reset: "পাসওয়ার্ড সফলভাবে রিসেট হয়েছে! লগইনে যাচ্ছে..."
+            }
+        };
+
+        let currentLang = localStorage.getItem('language') || 'en';
+
+        function applyTranslations(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+        }
+
+        function getText(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        // =============================================
+        // THEME TOGGLE
+        // =============================================
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        }
+
+        document.getElementById('theme-toggle-login').addEventListener('click', () => {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // =============================================
+        // FORM ELEMENTS
+        // =============================================
+        const loginForm = document.getElementById('login-form');
+        const forgotForm = document.getElementById('forgot-form');
+        const otpForm = document.getElementById('otp-form');
+        const resetForm = document.getElementById('reset-form');
+
+        const loginError = document.getElementById('login-error');
+        const forgotError = document.getElementById('forgot-error');
+        const forgotSuccess = document.getElementById('forgot-success');
+        const otpError = document.getElementById('otp-error');
+        const resetError = document.getElementById('reset-error');
+        const resetSuccess = document.getElementById('reset-success');
+
+        let currentOTP = '';
+        let currentEmail = '';
+
+        // =============================================
+        // SHOW/HIDE FORMS
+        // =============================================
+        function showForm(formToShow) {
+            loginForm.style.display = 'none';
+            forgotForm.style.display = 'none';
+            otpForm.style.display = 'none';
+            resetForm.style.display = 'none';
+
+            formToShow.style.display = 'block';
+
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+
+        document.getElementById('show-forgot').addEventListener('click', (e) => {
+            e.preventDefault();
+            showForm(forgotForm);
+        });
+
+        document.getElementById('back-to-login-1').addEventListener('click', (e) => {
+            e.preventDefault();
+            showForm(loginForm);
+        });
+
+        document.getElementById('back-to-login-2').addEventListener('click', (e) => {
+            e.preventDefault();
+            showForm(loginForm);
+        });
+
+        // =============================================
+        // LOGIN (Using Supabase)
+        // =============================================
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.toLowerCase().trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = loginForm.querySelector('.login-btn');
+            const originalText = loginBtn.textContent;
+
+            // Show loading
+            loginBtn.disabled = true;
+            loginBtn.textContent = getText('logging_in') || 'Logging in...';
+
+            try {
+                // Query Supabase
+                const { data, error } = await supabaseClient
+                    .from('accounts')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', password)
+                    .single();
+
+                if (error || !data) {
+                    loginError.textContent = getText('error_invalid_credentials');
+                    loginError.style.display = 'block';
+                } else {
+                    // Login successful
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('loggedInUser', JSON.stringify(data));
+                    window.location.href = 'index.html';
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                loginError.textContent = getText('error_invalid_credentials');
+                loginError.style.display = 'block';
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = originalText;
+            }
+        });
+
+        // =============================================
+        // FORGOT PASSWORD - SEND CODE VIA EMAIL
+        // =============================================
+        forgotForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('forgot-email').value.toLowerCase().trim();
+
+            // Check if email exists in Supabase
+            const { data: account, error } = await supabaseClient
+                .from('accounts')
+                .select('*')
+                .eq('email', email)
+                .single();
+
+            if (error || !account) {
+                forgotError.textContent = getText('error_email_not_found');
+                forgotError.style.display = 'block';
+                forgotSuccess.style.display = 'none';
+                return;
+            }
+
+            // Generate 6-digit OTP
+            currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            currentEmail = email;
+
+            // Disable button while sending
+            const sendBtn = document.getElementById('send-code-btn');
+            const originalText = sendBtn.textContent;
+            sendBtn.disabled = true;
+            sendBtn.textContent = getText('sending_code');
+
+            try {
+                // Send email via EmailJS
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_email: email,
+                    otp_code: currentOTP
+                });
+
+                // Show OTP form
+                document.getElementById('otp-email-display').textContent = email;
+                showForm(otpForm);
+                
+            } catch (error) {
+                console.error('EmailJS Error:', error);
+                forgotError.textContent = getText('error_email_failed');
+                forgotError.style.display = 'block';
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = originalText;
+            }
+        });
+
+        // =============================================
+        // VERIFY OTP
+        // =============================================
+        otpForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const enteredOTP = document.getElementById('otp-code').value;
+
+            if (enteredOTP === currentOTP) {
+                showForm(resetForm);
+            } else {
+                otpError.textContent = getText('error_invalid_otp');
+                otpError.style.display = 'block';
+            }
+        });
+
+        // =============================================
+        // RESET PASSWORD (Using Supabase)
+        // =============================================
+        resetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const resetBtn = resetForm.querySelector('.login-btn');
+
+            if (newPassword !== confirmPassword) {
+                resetError.textContent = getText('error_password_mismatch');
+                resetError.style.display = 'block';
+                resetSuccess.style.display = 'none';
+                return;
+            }
+
+            resetBtn.disabled = true;
+            resetBtn.textContent = 'Updating...';
+
+            try {
+                // Update password in Supabase
+                const { error } = await supabaseClient
+                    .from('accounts')
+                    .update({ password: newPassword })
+                    .eq('email', currentEmail);
+
+                if (error) throw error;
+
+                resetError.style.display = 'none';
+                resetSuccess.textContent = getText('success_password_reset');
+                resetSuccess.style.display = 'block';
+
+                setTimeout(() => {
+                    showForm(loginForm);
+                }, 2000);
+            } catch (err) {
+                console.error('Password reset error:', err);
+                resetError.textContent = 'Failed to update password. Please try again.';
+                resetError.style.display = 'block';
+            } finally {
+                resetBtn.disabled = false;
+                resetBtn.textContent = getText('reset_password_btn');
+            }
+        });
+
+        // =============================================
+        // LANGUAGE SWITCH
+        // =============================================
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                applyTranslations(btn.dataset.lang);
+            });
+        });
+
+        // =============================================
+        // CHECK IF ALREADY LOGGED IN
+        // =============================================
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            window.location.href = 'index.html';
+        }
+
+        // =============================================
+        // FLOATING PILLS ANIMATION
+        // =============================================
+        function createFloatingPills() {
+            const container = document.getElementById('floating-pills');
+            const pills = ['💊', '💉', '🩺', '🏥', '⚕️', '🩹', '🧪', '🔬', '❤️‍🩹', '🧬'];
+            
+            for (let i = 0; i < 20; i++) {
+                const pill = document.createElement('div');
+                pill.className = 'pill';
+                pill.textContent = pills[Math.floor(Math.random() * pills.length)];
+                pill.style.left = Math.random() * 100 + '%';
+                pill.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+                pill.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                pill.style.animationDelay = (Math.random() * 10) + 's';
+                container.appendChild(pill);
+            }
+        }
+        
+        createFloatingPills();
+
+        // =============================================
+        // INITIALIZE
+        // =============================================
+        applyTranslations(currentLang);
+    </script>
+</body>
+</html>

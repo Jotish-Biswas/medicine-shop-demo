@@ -6,6 +6,14 @@
     <title>Medicine Shop Inventory</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/party.css">
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Check if user is logged in
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -30,6 +38,9 @@
                 <button class="lang-btn" data-lang="bn" data-i18n="lang_bn">বাংলা</button>
                 <button id="theme-toggle" aria-label="Toggle Theme">
                     <span data-i18n="toggle_theme">Toggle Theme</span>
+                </button>
+                <button id="logout-btn" class="icon-btn" style="width: auto; padding: 0.5rem 1rem; background: #e74c3c; color: white; border-radius: 4px;">
+                    🚪 <span data-i18n="logout">Logout</span>
                 </button>
             </div>
         </div>
@@ -430,6 +441,23 @@
             <div class="form-actions">
                 <button type="button" id="close-history-btn" class="secondary-btn">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Amount Input Modal -->
+    <div id="amount-modal" class="modal">
+        <div class="modal-content" style="max-width: 350px;">
+            <h2 id="amount-modal-title">Enter Amount</h2>
+            <form id="amount-form">
+                <div class="form-group">
+                    <label for="amount-input" id="amount-label">Amount:</label>
+                    <input type="number" id="amount-input" min="1" value="1" required style="font-size: 1.5rem; text-align: center; padding: 1rem;">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="amount-confirm-btn" class="primary-btn">Confirm</button>
+                    <button type="button" id="amount-cancel-btn" class="secondary-btn">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 

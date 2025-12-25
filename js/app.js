@@ -1,8 +1,31 @@
-// Theme Toggle
+// =============================================
+// SUPABASE CONFIGURATION
+// =============================================
+const SUPABASE_URL = 'https://pmassayjacceepanxbkt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0yzWWlhaciJs8LYYjrlkcw_-ethAqLx';
+
+// Use existing supabase client or create new one
+let supabaseClient;
+if (typeof supabase !== 'undefined' && supabase.from) {
+    supabaseClient = supabase;
+} else {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
+
+// =============================================
+// GLOBAL VARIABLES
+// =============================================
+let shops = [];
+let medicines = [];
+let transactions = [];
+let isLoading = true;
+
+// =============================================
+// THEME TOGGLE
+// =============================================
 const themeToggleBtn = document.getElementById('theme-toggle');
 const body = document.body;
 
-// Check for saved theme preference
 const savedTheme = localStorage.getItem('theme');
 if (savedTheme) {
     body.setAttribute('data-theme', savedTheme);
@@ -18,76 +41,316 @@ themeToggleBtn.addEventListener('click', () => {
     }
 });
 
-// Shop Management
-let shops = JSON.parse(localStorage.getItem('shops')) || [
-    { id: 'main', name: 'Main Store' },
-    { id: 'a', name: 'Shop A' },
-    { id: 'b', name: 'Shop B' },
-    { id: 'c', name: 'Shop C' },
-    { id: 'd', name: 'Shop D' },
-    { id: 'e', name: 'Shop E' }
-];
-
-function saveShops() {
-    localStorage.setItem('shops', JSON.stringify(shops));
-}
-
-function addShop(name) {
-    const id = name.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
-    shops.push({ id, name });
-    saveShops();
-    renderTableHeaders();
-    renderMedicines();
-    renderShopTabs();
-    renderShopInputs();
-}
-
-// Dummy Data for Medicines
-let medicines = [
-    { id: 1, name: 'Napa Extra', company: 'Beximco', form: 'Tablet', price: '2.50', stock: { main: 100, a: 20, b: 15, c: 15, d: 10, e: 5 }, lowStockThreshold: 20, mfgDate: '2024-06-15', expDate: '2026-06-15' },
-    { id: 2, name: 'Seclo 20', company: 'Square', form: 'Capsule', price: '5.00', stock: { main: 50, a: 5, b: 5, c: 5, d: 2, e: 1 }, lowStockThreshold: 20, mfgDate: '2024-03-10', expDate: '2026-03-10' },
-    { id: 3, name: 'Maxpro 20', company: 'Renata', form: 'Capsule', price: '7.00', stock: { main: 200, a: 50, b: 30, c: 20, d: 10, e: 10 }, lowStockThreshold: 30, mfgDate: '2024-08-20', expDate: '2026-08-20' },
-    { id: 4, name: 'Alatrol', company: 'Square', form: 'Tablet', price: '3.00', stock: { main: 30, a: 2, b: 2, c: 1, d: 0, e: 0 }, lowStockThreshold: 10, mfgDate: '2024-01-05', expDate: '2026-01-05' },
-    { id: 5, name: 'Bizoran', company: 'Incepta', form: 'Tablet', price: '12.00', stock: { main: 60, a: 15, b: 15, c: 15, d: 5, e: 5 }, lowStockThreshold: 15, mfgDate: '2024-05-12', expDate: '2026-05-12' },
-    { id: 6, name: 'Napa Syrup', company: 'Beximco', form: 'Syrup', price: '35.00', stock: { main: 20, a: 3, b: 3, c: 2, d: 1, e: 1 }, lowStockThreshold: 10, mfgDate: '2024-09-01', expDate: '2025-09-01' },
-    { id: 7, name: 'Tygacil', company: 'Beximco', form: 'Injection', price: '500.00', stock: { main: 10, a: 2, b: 0, c: 1, d: 0, e: 0 }, lowStockThreshold: 5, mfgDate: '2024-11-15', expDate: '2026-11-15' },
-];
-
-// Load medicines from localStorage if available, otherwise use dummy data
-const savedMedicines = localStorage.getItem('medicines');
-if (savedMedicines) {
-    medicines = JSON.parse(savedMedicines);
-    // Migration: Add mfgDate and expDate to existing medicines without them
-    let needsSave = false;
-    medicines.forEach(med => {
-        if (!med.mfgDate) {
-            // Generate a random manufacture date (6-18 months ago)
-            const monthsAgo = Math.floor(Math.random() * 12) + 6;
-            const mfgDate = new Date();
-            mfgDate.setMonth(mfgDate.getMonth() - monthsAgo);
-            med.mfgDate = mfgDate.toISOString().split('T')[0];
-            needsSave = true;
-        }
-        if (!med.expDate) {
-            // Generate expire date (18-36 months from mfgDate)
-            const mfgDateObj = new Date(med.mfgDate);
-            const monthsToAdd = Math.floor(Math.random() * 18) + 18;
-            mfgDateObj.setMonth(mfgDateObj.getMonth() + monthsToAdd);
-            med.expDate = mfgDateObj.toISOString().split('T')[0];
-            needsSave = true;
-        }
+// =============================================
+// LOGOUT
+// =============================================
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('loggedInUser');
+        window.location.href = 'login.html';
     });
-    if (needsSave) {
-        localStorage.setItem('medicines', JSON.stringify(medicines));
+}
+
+// =============================================
+// LOAD DATA FROM SUPABASE
+// =============================================
+async function loadShops() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('shops')
+            .select('*');
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            shops = data.map(s => ({ id: s.shop_id, name: s.name, dbId: s.id }));
+        } else {
+            // No shops in database, use defaults
+            shops = [
+                { id: 'main', name: 'Main Store' },
+                { id: 'a', name: 'Shop A' },
+                { id: 'b', name: 'Shop B' },
+                { id: 'c', name: 'Shop C' },
+                { id: 'd', name: 'Shop D' },
+                { id: 'e', name: 'Shop E' }
+            ];
+        }
+        console.log('✅ Shops loaded:', shops.length);
+    } catch (err) {
+        console.error('Error loading shops:', err);
+        // Fallback to default shops
+        shops = [
+            { id: 'main', name: 'Main Store' },
+            { id: 'a', name: 'Shop A' },
+            { id: 'b', name: 'Shop B' },
+            { id: 'c', name: 'Shop C' },
+            { id: 'd', name: 'Shop D' },
+            { id: 'e', name: 'Shop E' }
+        ];
     }
 }
 
-// Transaction History (Simulated)
-let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+async function loadMedicines() {
+    try {
+        const { data: medsData, error } = await supabaseClient
+            .from('medicines')
+            .select('*')
+            .order('name');
 
-function logTransaction(type, quantity, price, shop, medicineName) {
+        if (error) throw error;
+
+        // Get stock for each medicine
+        const { data: stockData } = await supabaseClient
+            .from('stock')
+            .select('*');
+
+        medicines = medsData.map(med => {
+            const stock = {};
+            if (stockData) {
+                stockData
+                    .filter(s => s.medicine_id === med.id)
+                    .forEach(s => {
+                        stock[s.shop_id] = s.quantity;
+                    });
+            }
+            
+            return {
+                id: med.id,
+                name: med.name,
+                company: med.company,
+                form: med.form,
+                price: med.price,
+                lowStockThreshold: med.low_stock_threshold,
+                mfgDate: med.mfg_date,
+                expDate: med.exp_date,
+                stock: stock
+            };
+        });
+
+        console.log('✅ Medicines loaded:', medicines.length);
+    } catch (err) {
+        console.error('Error loading medicines:', err);
+        medicines = [];
+    }
+}
+
+async function loadTransactions() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('transactions')
+            .select('*')
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+        transactions = data || [];
+        console.log('✅ Transactions loaded:', transactions.length);
+    } catch (err) {
+        console.error('Error loading transactions:', err);
+        transactions = [];
+    }
+}
+
+// =============================================
+// SAVE DATA TO SUPABASE
+// =============================================
+async function addShopToDb(name) {
+    const shopId = name.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
+    try {
+        const { data, error } = await supabaseClient
+            .from('shops')
+            .insert({ shop_id: shopId, name: name })
+            .select()
+            .single();
+
+        if (error) throw error;
+        
+        shops.push({ id: shopId, name: name, dbId: data.id });
+        return { success: true };
+    } catch (err) {
+        console.error('Error adding shop:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+async function deleteShopFromDb(shopId) {
+    try {
+        const { error } = await supabaseClient
+            .from('shops')
+            .delete()
+            .eq('shop_id', shopId);
+
+        if (error) throw error;
+        
+        shops = shops.filter(s => s.id !== shopId);
+        return { success: true };
+    } catch (err) {
+        console.error('Error deleting shop:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+async function addMedicineToDb(medicine) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('medicines')
+            .insert({
+                name: medicine.name,
+                company: medicine.company,
+                form: medicine.form,
+                price: parseFloat(medicine.price),
+                low_stock_threshold: parseInt(medicine.lowStockThreshold) || 20,
+                mfg_date: medicine.mfgDate || null,
+                exp_date: medicine.expDate || null
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Add stock entries
+        if (medicine.stock) {
+            const stockEntries = Object.entries(medicine.stock)
+                .filter(([_, qty]) => qty > 0)
+                .map(([shopId, qty]) => ({
+                    medicine_id: data.id,
+                    shop_id: shopId,
+                    quantity: parseInt(qty)
+                }));
+
+            if (stockEntries.length > 0) {
+                await supabaseClient.from('stock').insert(stockEntries);
+            }
+        }
+
+        return { success: true, data };
+    } catch (err) {
+        console.error('Error adding medicine:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+async function updateMedicineInDb(id, updates) {
+    try {
+        const dbUpdates = {};
+        if (updates.name !== undefined) dbUpdates.name = updates.name;
+        if (updates.company !== undefined) dbUpdates.company = updates.company;
+        if (updates.form !== undefined) dbUpdates.form = updates.form;
+        if (updates.price !== undefined) dbUpdates.price = parseFloat(updates.price);
+        if (updates.lowStockThreshold !== undefined) dbUpdates.low_stock_threshold = parseInt(updates.lowStockThreshold);
+        if (updates.mfgDate !== undefined) dbUpdates.mfg_date = updates.mfgDate;
+        if (updates.expDate !== undefined) dbUpdates.exp_date = updates.expDate;
+
+        const { error } = await supabaseClient
+            .from('medicines')
+            .update(dbUpdates)
+            .eq('id', id);
+
+        if (error) throw error;
+        return { success: true };
+    } catch (err) {
+        console.error('Error updating medicine:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+async function deleteMedicineFromDb(id) {
+    try {
+        const { error } = await supabaseClient
+            .from('medicines')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        return { success: true };
+    } catch (err) {
+        console.error('Error deleting medicine:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+async function updateStockInDb(medicineId, shopId, quantity) {
+    try {
+        // Check if stock entry exists
+        const { data: existing } = await supabaseClient
+            .from('stock')
+            .select('id')
+            .eq('medicine_id', medicineId)
+            .eq('shop_id', shopId)
+            .single();
+
+        if (existing) {
+            await supabaseClient
+                .from('stock')
+                .update({ quantity: parseInt(quantity) })
+                .eq('medicine_id', medicineId)
+                .eq('shop_id', shopId);
+        } else {
+            await supabaseClient
+                .from('stock')
+                .insert({
+                    medicine_id: medicineId,
+                    shop_id: shopId,
+                    quantity: parseInt(quantity)
+                });
+        }
+
+        return { success: true };
+    } catch (err) {
+        console.error('Error updating stock:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+async function logTransactionToDb(type, quantity, price, shopId, medicineId) {
+    try {
+        const { error } = await supabaseClient
+            .from('transactions')
+            .insert({
+                medicine_id: medicineId,
+                shop_id: shopId,
+                type: type,
+                quantity: parseInt(quantity),
+                price: parseFloat(price)
+            });
+
+        if (error) throw error;
+        return { success: true };
+    } catch (err) {
+        console.error('Error logging transaction:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+// =============================================
+// LEGACY FUNCTIONS (Modified for Supabase)
+// =============================================
+function saveShops() {
+    // No longer needed - data is in Supabase
+}
+
+function addShop(name) {
+    addShopToDb(name).then(result => {
+        if (result.success) {
+            renderTableHeaders();
+            renderMedicines();
+            renderShopTabs();
+            renderShopInputs();
+        } else {
+            alert('Failed to add shop: ' + result.error);
+        }
+    });
+}
+
+function saveMedicines() {
+    // No longer needed - data is in Supabase
+}
+
+function logTransaction(type, quantity, price, shop, medicineName, medicineId) {
+    // Log to local array
     const transaction = {
-        type: type, // 'in' or 'out'
+        type: type,
         quantity: quantity,
         price: parseFloat(price),
         shop: shop,
@@ -95,7 +358,9 @@ function logTransaction(type, quantity, price, shop, medicineName) {
         date: new Date().toISOString()
     };
     transactions.push(transaction);
-    localStorage.setItem('transactions', JSON.stringify(transactions));
+    
+    // Also save to Supabase
+    logTransactionToDb(type, quantity, price, shop, medicineId);
 }
 
 function getStats() {
@@ -197,7 +462,8 @@ function renderTableHeaders() {
     thead.innerHTML = '';
     const tr = document.createElement('tr');
 
-    const headers = ['#', 'Name', 'Company', 'Price', 'Total Stock'];
+    // Mfg Date and Exp Date now come right after Total Stock
+    const headers = ['#', 'Name', 'Company', 'Price', 'Total Stock', 'Mfg Date', 'Exp Date'];
     const activeShop = document.querySelector('.shop-tab.active')?.dataset.shop || 'all';
 
     let headerHTML = headers.map(h => `<th>${h}</th>`).join('');
@@ -209,9 +475,6 @@ function renderTableHeaders() {
     } else {
         headerHTML += '<th>Stock</th>';
     }
-    
-    // Add Mfg Date and Exp Date at the end
-    headerHTML += '<th>Mfg Date</th><th>Exp Date</th>';
     
     tr.innerHTML = headerHTML;
     thead.appendChild(tr);
@@ -233,6 +496,7 @@ function createMedicineRow(medicine, index) {
     const isExpired = expDateObj && expDateObj < today;
     const isExpiringSoon = expDateObj && !isExpired && (expDateObj - today) / (1000 * 60 * 60 * 24) <= 30;
 
+    // Mfg Date and Exp Date now come right after Total Stock
     let cells = `
         <td>${index + 1}</td>
         <td>
@@ -244,6 +508,8 @@ function createMedicineRow(medicine, index) {
             <input type="number" class="price-input" data-id="${medicine.id}" value="${medicine.price}" step="0.01" min="0">
         </td>
         <td style="font-weight: bold; text-align: center;">${totalStock}</td>
+        <td>${mfgDate}</td>
+        <td class="${isExpired ? 'expired-date' : isExpiringSoon ? 'expiring-soon' : ''}">${expDate}</td>
     `;
 
     if (activeShop === 'all') {
@@ -276,12 +542,6 @@ function createMedicineRow(medicine, index) {
         `;
     }
 
-    // Add Mfg Date and Exp Date at the end (rightmost)
-    cells += `
-        <td>${mfgDate}</td>
-        <td class="${isExpired ? 'expired-date' : isExpiringSoon ? 'expiring-soon' : ''}">${expDate}</td>
-    `;
-    
     tr.innerHTML = cells;
 
     if (totalStock <= (medicine.lowStockThreshold || 10)) {
@@ -338,9 +598,6 @@ function renderDashboard() {
     // Dashboard cards removed - function kept for compatibility
 }
 
-// Initial Render
-renderMedicines();
-
 // Search Functionality
 if (searchBar) {
     searchBar.addEventListener('input', () => {
@@ -360,6 +617,85 @@ if (groupBy) {
 }
 
 // Stock Interaction (Delegation) - Input and Buttons
+// Amount Modal Elements
+const amountModal = document.getElementById('amount-modal');
+const amountForm = document.getElementById('amount-form');
+const amountInput = document.getElementById('amount-input');
+const amountCancelBtn = document.getElementById('amount-cancel-btn');
+const amountModalTitle = document.getElementById('amount-modal-title');
+
+let pendingStockAction = null; // Store pending action details
+
+function showAmountModal(actionType, medId, shop, medName) {
+    pendingStockAction = { actionType, medId, shop, medName };
+    
+    if (amountModalTitle) {
+        const actionText = actionType === 'plus' ? 'Add Stock' : 'Remove Stock';
+        amountModalTitle.textContent = `${actionText} - ${medName}`;
+    }
+    
+    if (amountInput) {
+        amountInput.value = 1;
+        amountInput.focus();
+    }
+    
+    if (amountModal) amountModal.classList.add('show');
+}
+
+if (amountForm) {
+    amountForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        if (!pendingStockAction) return;
+        
+        const amount = parseInt(amountInput.value);
+        const { actionType, medId, shop } = pendingStockAction;
+        const med = medicines.find(m => m.id === medId);
+        
+        if (!med || isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid positive number.");
+            return;
+        }
+        
+        if (actionType === 'plus') {
+            med.stock[shop] = (med.stock[shop] || 0) + amount;
+            logTransaction('in', amount, med.price, shop, med.name, med.id);
+            updateStockInDb(med.id, shop, med.stock[shop]);
+        } else if (actionType === 'minus') {
+            if ((med.stock[shop] || 0) >= amount) {
+                med.stock[shop] = (med.stock[shop] || 0) - amount;
+                logTransaction('out', amount, med.price, shop, med.name, med.id);
+                updateStockInDb(med.id, shop, med.stock[shop]);
+            } else {
+                alert("Not enough stock to subtract.");
+                return;
+            }
+        }
+        
+        const filter = searchBar ? searchBar.value : '';
+        const group = groupBy ? groupBy.value : 'all';
+        renderMedicines(filter, group);
+        
+        amountModal.classList.remove('show');
+        pendingStockAction = null;
+    });
+}
+
+if (amountCancelBtn) {
+    amountCancelBtn.addEventListener('click', () => {
+        if (amountModal) amountModal.classList.remove('show');
+        pendingStockAction = null;
+    });
+}
+
+// Close amount modal on outside click
+window.addEventListener('click', (e) => {
+    if (e.target === amountModal) {
+        amountModal.classList.remove('show');
+        pendingStockAction = null;
+    }
+});
+
 if (medicineTableBody) {
     medicineTableBody.addEventListener('click', (e) => {
         if (e.target.classList.contains('stock-btn')) {
@@ -368,27 +704,8 @@ if (medicineTableBody) {
             const med = medicines.find(m => m.id === id);
             
             if (med) {
-                const amountStr = prompt("Enter amount to add/subtract:", "1");
-                const amount = parseInt(amountStr);
-
-                if (!isNaN(amount) && amount > 0) {
-                    if (e.target.classList.contains('plus')) {
-                        med.stock[shop] = (med.stock[shop] || 0) + amount;
-                        logTransaction('in', amount, med.price, shop, med.name);
-                    } else if (e.target.classList.contains('minus')) {
-                        if (med.stock[shop] >= amount) {
-                            med.stock[shop] -= amount;
-                            logTransaction('out', amount, med.price, shop, med.name);
-                        } else {
-                            alert("Not enough stock to subtract.");
-                        }
-                    }
-                    const filter = searchBar ? searchBar.value : '';
-                    const group = groupBy ? groupBy.value : 'all';
-                    renderMedicines(filter, group);
-                } else if (amountStr !== null) {
-                    alert("Please enter a valid positive number.");
-                }
+                const actionType = e.target.classList.contains('plus') ? 'plus' : 'minus';
+                showAmountModal(actionType, id, shop, med.name);
             }
         }
     });
@@ -405,11 +722,13 @@ if (medicineTableBody) {
                 const oldStock = med.stock[shop] || 0;
                 const diff = newStock - oldStock;
                 if (diff > 0) {
-                    logTransaction('in', diff, med.price, shop, med.name);
+                    logTransaction('in', diff, med.price, shop, med.name, med.id);
                 } else if (diff < 0) {
-                    logTransaction('out', Math.abs(diff), med.price, shop, med.name);
+                    logTransaction('out', Math.abs(diff), med.price, shop, med.name, med.id);
                 }
                 med.stock[shop] = newStock;
+                // Update in Supabase
+                updateStockInDb(med.id, shop, newStock);
                 // Update total stock display
                 const totalStock = getTotalStock(med);
                 const row = e.target.closest('tr');
@@ -429,6 +748,8 @@ if (medicineTableBody) {
             
             if (med && !isNaN(newPrice) && newPrice >= 0) {
                 med.price = newPrice.toFixed(2);
+                // Update in Supabase
+                updateMedicineInDb(id, { price: newPrice });
             }
         }
     });
@@ -769,105 +1090,179 @@ if (statsManualDate) {
     });
 }
 
-statsBtn.addEventListener('click', () => {
-    const stats = getStats();
-    document.getElementById('stat-daily-sales').textContent = `৳${stats.dailySales}`;
-    document.getElementById('stat-monthly-sales').textContent = `৳${stats.monthlySales}`;
+if (statsBtn) {
+    statsBtn.addEventListener('click', () => {
+        const stats = getStats();
+        document.getElementById('stat-daily-sales').textContent = `৳${stats.dailySales}`;
+        document.getElementById('stat-monthly-sales').textContent = `৳${stats.monthlySales}`;
 
-    populateYearDropdown();
-    populateDayDropdown();
-    
-    // Set current month/year in dropdowns
-    const now = new Date();
-    if (statsMonthDropdown) statsMonthDropdown.value = now.getMonth() + 1;
-    if (statsYearDropdown) statsYearDropdown.value = now.getFullYear();
-    if (statsDayDropdown) statsDayDropdown.value = 'all';
-    if (statsManualDate) statsManualDate.value = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+        populateYearDropdown();
+        populateDayDropdown();
+        
+        // Set current month/year in dropdowns
+        const now = new Date();
+        if (statsMonthDropdown) statsMonthDropdown.value = now.getMonth() + 1;
+        if (statsYearDropdown) statsYearDropdown.value = now.getFullYear();
+        if (statsDayDropdown) statsDayDropdown.value = 'all';
+        if (statsManualDate) statsManualDate.value = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
 
-    updateStats();
-    statsModal.classList.add('show');
-});
+        updateStats();
+        if (statsModal) statsModal.classList.add('show');
+    });
+}
 
 // PDF Download Logic
 const downloadPdfBtn = document.getElementById('download-pdf-btn');
 if (downloadPdfBtn) {
     downloadPdfBtn.addEventListener('click', () => {
-        if (!window.jspdf) {
-            alert("PDF library not loaded. Please check your internet connection.");
-            return;
-        }
-        
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        const shopName = statsShopSelect.options[statsShopSelect.selectedIndex].text;
-        const monthName = statsMonthDropdown.options[statsMonthDropdown.selectedIndex].text;
-        const year = statsYearDropdown.value;
-        
-        doc.setFontSize(18);
-        doc.text(`Stock Movement Report`, 14, 22);
-        
-        doc.setFontSize(12);
-        doc.text(`Shop: ${shopName}`, 14, 32);
-        doc.text(`Period: ${monthName} ${year}`, 14, 38);
-        
-        doc.autoTable({
-            html: '#stats-table',
-            startY: 45,
-            theme: 'grid',
-            headStyles: { fillColor: [0, 137, 123] }, // Match primary color
-            styles: { fontSize: 10, cellPadding: 3 },
-            columnStyles: {
-                0: { cellWidth: 20 }, // Day
-                1: { cellWidth: 'auto' }, // Name
-                2: { cellWidth: 25, halign: 'center' }, // Added
-                3: { cellWidth: 25, halign: 'center' }, // Out
-                4: { cellWidth: 30, halign: 'center' }  // Stock
+        try {
+            // Check if jsPDF is loaded
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                alert("PDF library not loaded. Please check your internet connection and refresh the page.");
+                console.error('jsPDF not loaded');
+                return;
             }
-        });
-        
-        doc.save(`stock_report_${shopName}_${monthName}_${year}.pdf`);
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Get values with fallbacks
+            const shopName = statsShopSelect ? 
+                (statsShopSelect.options[statsShopSelect.selectedIndex]?.text || 'All Shops') : 'All Shops';
+            const monthName = statsMonthDropdown ? 
+                (statsMonthDropdown.options[statsMonthDropdown.selectedIndex]?.text || 'Unknown') : 'Unknown';
+            const year = statsYearDropdown ? (statsYearDropdown.value || new Date().getFullYear()) : new Date().getFullYear();
+            
+            doc.setFontSize(18);
+            doc.text(`Stock Movement Report`, 14, 22);
+            
+            doc.setFontSize(12);
+            doc.text(`Shop: ${shopName}`, 14, 32);
+            doc.text(`Period: ${monthName} ${year}`, 14, 38);
+            
+            // Check if table exists
+            const statsTable = document.getElementById('stats-table');
+            if (!statsTable) {
+                alert("No data to export. Please view statistics first.");
+                return;
+            }
+            
+            // Try autoTable first, fallback to manual if not available
+            if (typeof doc.autoTable === 'function') {
+                doc.autoTable({
+                    html: '#stats-table',
+                    startY: 45,
+                    theme: 'grid',
+                    headStyles: { fillColor: [0, 137, 123] },
+                    styles: { fontSize: 10, cellPadding: 3 },
+                    columnStyles: {
+                        0: { cellWidth: 20 },
+                        1: { cellWidth: 'auto' },
+                        2: { cellWidth: 25, halign: 'center' },
+                        3: { cellWidth: 25, halign: 'center' },
+                        4: { cellWidth: 30, halign: 'center' }
+                    }
+                });
+            } else {
+                // Manual table generation fallback
+                console.log('autoTable not available, using manual method');
+                
+                const rows = statsTable.querySelectorAll('tr');
+                let yPos = 50;
+                const lineHeight = 8;
+                const colWidths = [20, 60, 25, 25, 30];
+                const startX = 14;
+                
+                rows.forEach((row, rowIndex) => {
+                    const cells = row.querySelectorAll('th, td');
+                    let xPos = startX;
+                    
+                    // Header row styling
+                    if (rowIndex === 0) {
+                        doc.setFillColor(0, 137, 123);
+                        doc.rect(startX, yPos - 5, 160, lineHeight, 'F');
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(10);
+                    } else {
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(9);
+                    }
+                    
+                    cells.forEach((cell, cellIndex) => {
+                        const text = cell.textContent.trim().substring(0, 25);
+                        doc.text(text, xPos, yPos);
+                        xPos += colWidths[cellIndex] || 30;
+                    });
+                    
+                    yPos += lineHeight;
+                    
+                    // Add new page if needed
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                });
+            }
+            
+            doc.save(`stock_report_${shopName}_${monthName}_${year}.pdf`);
+            console.log('✅ PDF downloaded successfully');
+        } catch (err) {
+            console.error('PDF generation error:', err);
+            alert('Failed to generate PDF: ' + err.message);
+        }
     });
 }
 
-closeStatsBtn.addEventListener('click', () => {
-    statsModal.classList.remove('show');
-});
+if (closeStatsBtn) {
+    closeStatsBtn.addEventListener('click', () => {
+        if (statsModal) statsModal.classList.remove('show');
+    });
+}
 
 // Close modal when clicking outside
 window.addEventListener('click', (e) => {
-    if (e.target === addItemModal) addItemModal.classList.remove('show');
-    if (e.target === alertsModal) alertsModal.classList.remove('show');
-    if (e.target === statsModal) statsModal.classList.remove('show');
+    if (addItemModal && e.target === addItemModal) addItemModal.classList.remove('show');
+    if (alertsModal && e.target === alertsModal) alertsModal.classList.remove('show');
+    if (statsModal && e.target === statsModal) statsModal.classList.remove('show');
 });
 
 // Handle Form Submission
-addItemForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+if (addItemForm) {
+    addItemForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    const name = document.getElementById('new-name').value;
-    const company = document.getElementById('new-company').value;
-    const price = parseFloat(document.getElementById('new-price').value).toFixed(2);
-    const mfgDate = document.getElementById('new-mfg-date').value;
-    const expDate = document.getElementById('new-exp-date').value;
-    
-    const stock = {};
-    shops.forEach(shop => {
-        const input = document.getElementById(`new-stock-${shop.id}`);
-        stock[shop.id] = input ? (parseInt(input.value) || 0) : 0;
-    });
+        const name = document.getElementById('new-name').value;
+        const company = document.getElementById('new-company').value;
+        const price = parseFloat(document.getElementById('new-price').value).toFixed(2);
+        const mfgDate = document.getElementById('new-mfg-date').value;
+        const expDate = document.getElementById('new-exp-date').value;
+        
+        const stock = {};
+        shops.forEach(shop => {
+            const input = document.getElementById(`new-stock-${shop.id}`);
+            stock[shop.id] = input ? (parseInt(input.value) || 0) : 0;
+        });
 
-    // Check if editing
-    const editId = addItemForm.dataset.editId;
-    
-    if (editId) {
-        const med = medicines.find(m => m.id === parseInt(editId));
-        if (med) {
-            med.name = name;
-            med.company = company;
-            med.price = price;
-            med.mfgDate = mfgDate;
-            med.expDate = expDate;
+        // Check if editing
+        const editId = addItemForm.dataset.editId;
+        
+        if (editId) {
+            const med = medicines.find(m => m.id === parseInt(editId));
+            if (med) {
+                med.name = name;
+                med.company = company;
+                med.price = price;
+                med.mfgDate = mfgDate;
+                med.expDate = expDate;
+                
+                // Update in Supabase
+                await updateMedicineInDb(parseInt(editId), {
+                    name: name,
+                    company: company,
+                    price: parseFloat(price),
+                    mfgDate: mfgDate,
+                expDate: expDate
+            });
             
             shops.forEach(shop => {
                 const newStock = stock[shop.id];
@@ -875,19 +1270,18 @@ addItemForm.addEventListener('submit', (e) => {
                 const diff = newStock - oldStock;
                 
                 if (diff > 0) {
-                    logTransaction('in', diff, price, shop.id, name);
+                    logTransaction('in', diff, price, shop.id, name, med.id);
                 } else if (diff < 0) {
-                    logTransaction('out', Math.abs(diff), price, shop.id, name);
+                    logTransaction('out', Math.abs(diff), price, shop.id, name, med.id);
                 }
                 med.stock[shop.id] = newStock;
+                // Update stock in Supabase
+                updateStockInDb(parseInt(editId), shop.id, newStock);
             });
         }
         delete addItemForm.dataset.editId; // Clear edit mode
     } else {
-        const newId = medicines.length > 0 ? Math.max(...medicines.map(m => m.id)) + 1 : 1;
-
         const newMedicine = {
-            id: newId,
             name: name,
             company: company,
             form: '', // Type removed
@@ -898,21 +1292,31 @@ addItemForm.addEventListener('submit', (e) => {
             lowStockThreshold: 10 // Default threshold
         };
 
-        medicines.push(newMedicine);
+        // Save to Supabase
+        const result = await addMedicineToDb(newMedicine);
         
-        // Log initial stock as 'in'
-        shops.forEach(shop => {
-            if (stock[shop.id] > 0) {
-                logTransaction('in', stock[shop.id], price, shop.id, name);
-            }
-        });
+        if (result.success) {
+            newMedicine.id = result.data.id;
+            medicines.push(newMedicine);
+            
+            // Log initial stock as 'in'
+            shops.forEach(shop => {
+                if (stock[shop.id] > 0) {
+                    logTransaction('in', stock[shop.id], price, shop.id, name, result.data.id);
+                }
+            });
+        } else {
+            alert('Failed to add medicine: ' + result.error);
+            return;
+        }
     }
 
     renderMedicines();
     
     addItemModal.classList.remove('show');
     addItemForm.reset();
-});
+    });
+} // End of addItemForm check
 
 // Render Shop Inputs in Add Modal
 function renderShopInputs() {
@@ -1005,7 +1409,7 @@ if (cancelDeleteShopBtn) {
 }
 
 if (confirmDeleteShopBtn) {
-    confirmDeleteShopBtn.addEventListener('click', () => {
+    confirmDeleteShopBtn.addEventListener('click', async () => {
         const shopId = deleteShopSelect.value;
         if (!shopId) return;
 
@@ -1013,26 +1417,28 @@ if (confirmDeleteShopBtn) {
         if (shopIndex > -1) {
             const shopName = shops[shopIndex].name;
             
-            // Remove shop from list
-            shops.splice(shopIndex, 1);
-            saveShops();
-
-            // Remove stock data for this shop from all medicines
-            medicines.forEach(med => {
-                if (med.stock && med.stock[shopId] !== undefined) {
-                    delete med.stock[shopId];
-                }
-            });
+            // Delete from Supabase
+            const result = await deleteShopFromDb(shopId);
             
-            // Re-render everything
-            renderTableHeaders();
-            renderMedicines();
-            renderShopTabs();
-            renderShopInputs();
-            renderShopDropdown();
-            
-            deleteShopModal.classList.remove('show');
-            // alert(`Shop "${shopName}" deleted successfully.`);
+            if (result.success) {
+                // Remove stock data for this shop from all medicines
+                medicines.forEach(med => {
+                    if (med.stock && med.stock[shopId] !== undefined) {
+                        delete med.stock[shopId];
+                    }
+                });
+                
+                // Re-render everything
+                renderTableHeaders();
+                renderMedicines();
+                renderShopTabs();
+                renderShopInputs();
+                renderShopDropdown();
+                
+                deleteShopModal.classList.remove('show');
+            } else {
+                alert('Failed to delete shop: ' + result.error);
+            }
         }
     });
 }
@@ -1085,26 +1491,50 @@ window.addEventListener('click', (e) => {
 });
 
 if (confirmDeleteMedBtn) {
-    confirmDeleteMedBtn.addEventListener('click', () => {
+    confirmDeleteMedBtn.addEventListener('click', async () => {
         const medId = parseInt(deleteMedSelect.value);
         if (!medId) return;
 
         const medIndex = medicines.findIndex(m => m.id === medId);
         if (medIndex > -1) {
-            // Remove medicine
-            medicines.splice(medIndex, 1);
+            // Delete from Supabase
+            const result = await deleteMedicineFromDb(medId);
             
-            // Re-render
-            renderMedicines();
-            
-            deleteMedModal.classList.remove('show');
+            if (result.success) {
+                // Remove medicine from local array
+                medicines.splice(medIndex, 1);
+                
+                // Re-render
+                renderMedicines();
+                
+                deleteMedModal.classList.remove('show');
+            } else {
+                alert('Failed to delete medicine: ' + result.error);
+            }
         }
     });
 }
 
 // Initial Render Calls
-renderShopInputs();
-renderShopTabs();
-renderShopDropdown();
-renderMedicines(); // This calls renderTableHeaders
+async function initApp() {
+    console.log('🚀 Initializing app...');
+    
+    // Load data from Supabase
+    await loadShops();
+    await loadMedicines();
+    await loadTransactions();
+    
+    console.log('📦 Data loaded - Shops:', shops.length, 'Medicines:', medicines.length);
+    
+    // Now render UI
+    renderShopInputs();
+    renderShopTabs();
+    renderShopDropdown();
+    renderTableHeaders();
+    renderMedicines();
+    
+    console.log('✅ App initialized!');
+}
 
+// Start the app
+initApp();

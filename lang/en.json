@@ -63,5 +63,6 @@
     "actions": "Actions",
     "label_mfg_date": "Manufacture Date",
     "label_exp_date": "Expire Date",
-    "bill_number": "Bill No."
+    "bill_number": "Bill No.",
+    "logout": "Logout"
 }

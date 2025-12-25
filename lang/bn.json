@@ -63,5 +63,6 @@
     "actions": "কার্যকরী",
     "label_mfg_date": "তৈরির তারিখ",
     "label_exp_date": "মেয়াদ উত্তীর্ণের তারিখ",
-    "bill_number": "বিল নম্বর"
+    "bill_number": "বিল নম্বর",
+    "logout": "লগ আউট"
 }

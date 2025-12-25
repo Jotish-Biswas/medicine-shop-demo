@@ -487,9 +487,10 @@ select:focus {
 }
 
 /* This is the single source of truth for .stock-input styling */
-/* This is the single source of truth for .stock-input styling */
 .stock-input {
-    width: 120px; /* Fixed width to match price input */
+    min-width: 120px; /* Minimum width */
+    width: auto; /* Allow dynamic width */
+    max-width: 300px; /* Max width limit */
     height: 34px;
     font-size: 1rem;
     text-align: center;
@@ -498,14 +499,49 @@ select:focus {
     background: var(--input-bg);
     color: var(--text-color);
     font-weight: bold;
-    padding: 4px;
+    padding: 4px 8px;
     -moz-appearance: textfield;
+    transition: width 0.2s ease;
 }
 
 .stock-input::-webkit-outer-spin-button,
 .stock-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+/* Amount Modal Styles */
+#amount-modal .modal-content {
+    text-align: center;
+}
+
+#amount-modal h2 {
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+#amount-modal #amount-input {
+    width: 100%;
+    font-size: 2rem;
+    padding: 1rem;
+    text-align: center;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+#amount-modal .form-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+#amount-modal .form-actions button {
+    min-width: 100px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
 }
 
 .modal-content h2 {
