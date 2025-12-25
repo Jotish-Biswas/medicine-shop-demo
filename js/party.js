@@ -175,9 +175,10 @@ function renderPartyTransactions(category) {
         const tDate = new Date(t.createdDate);
         const totalPaid = getTotalPaid(t);
         const presentDue = t.due - totalPaid;
+        const isPaid = presentDue <= 0;
         
         item.innerHTML = `
-            <span>${t.name}</span>
+            <span>${t.name} ${isPaid ? '<span class="paid-tick">✓</span>' : ''}</span>
             <span>৳${t.due.toFixed(2)}</span>
             <span>৳${totalPaid.toFixed(2)}</span>
             <span class="present-due ${presentDue > 0 ? 'due-pending' : 'due-paid'}">৳${presentDue.toFixed(2)}</span>
@@ -213,6 +214,7 @@ function openPaymentModal(partyId) {
     document.getElementById('payment-amount').max = presentDue;
     document.getElementById('payment-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('payment-type').value = 'Cash';
+    document.getElementById('payment-bill-number').value = '';
     document.getElementById('payment-party-id').value = partyId;
 
     addPaymentModal.classList.add('show');
@@ -244,12 +246,13 @@ function openHistoryModal(partyId) {
         sortedPayments.forEach(p => {
             const item = document.createElement('div');
             item.className = 'party-item';
-            item.style.gridTemplateColumns = '1fr 1fr 1fr';
+            item.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
             const pDate = new Date(p.date);
             item.innerHTML = `
                 <span>${pDate.toLocaleDateString()}</span>
                 <span class="payment-amount">৳${p.amount.toFixed(2)}</span>
                 <span>${p.type}</span>
+                <span>${p.billNumber || '-'}</span>
             `;
             historyBody.appendChild(item);
         });
@@ -336,7 +339,8 @@ addPaymentForm.addEventListener('submit', (e) => {
             id: Date.now(),
             amount: parseFloat(document.getElementById('payment-amount').value) || 0,
             type: document.getElementById('payment-type').value,
-            date: document.getElementById('payment-date').value
+            date: document.getElementById('payment-date').value,
+            billNumber: document.getElementById('payment-bill-number').value || ''
         };
         
         party.payments.push(payment);

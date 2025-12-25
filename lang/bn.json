@@ -60,5 +60,8 @@
     "btn_history": "ইতিহাস",
     "btn_delete": "মুছুন",
     "created_date": "তারিখ",
-    "actions": "কার্যকরী"
+    "actions": "কার্যকরী",
+    "label_mfg_date": "তৈরির তারিখ",
+    "label_exp_date": "মেয়াদ উত্তীর্ণের তারিখ",
+    "bill_number": "বিল নম্বর"
 }

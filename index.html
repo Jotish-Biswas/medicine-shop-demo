@@ -102,6 +102,16 @@
                     <label for="new-price" data-i18n="label_price">Price</label>
                     <input type="number" id="new-price" step="0.01" required>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="new-mfg-date" data-i18n="label_mfg_date">Manufacture Date</label>
+                        <input type="date" id="new-mfg-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-exp-date" data-i18n="label_exp_date">Expire Date</label>
+                        <input type="date" id="new-exp-date" required>
+                    </div>
+                </div>
                 
                 <!-- Dynamic Shop Inputs -->
                 <div id="shop-stock-inputs-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
@@ -372,17 +382,21 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="payment-date">Payment Date</label>
+                        <label for="payment-date" data-i18n="date">Payment Date</label>
                         <input type="date" id="payment-date" required>
                     </div>
                     <div class="form-group">
-                        <label for="payment-type">Payment Type</label>
+                        <label for="payment-type" data-i18n="party_type">Payment Type</label>
                         <select id="payment-type" required>
                             <option value="Cash">Cash</option>
                             <option value="Agrani Bank">Agrani Bank</option>
                             <option value="Brac Bank">Brac Bank</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="payment-bill-number" data-i18n="bill_number">Bill Number</label>
+                    <input type="text" id="payment-bill-number" placeholder="Enter bill number (optional)">
                 </div>
                 <input type="hidden" id="payment-party-id">
                 <div class="form-actions">
@@ -403,10 +417,11 @@
                 <div><strong data-i18n="present_due">Present Due:</strong> <span id="history-present-due">৳0</span></div>
             </div>
             <div class="payment-history-list">
-                <div class="party-item party-header" style="grid-template-columns: 1fr 1fr 1fr;">
+                <div class="party-item party-header" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
                     <span data-i18n="date">Date</span>
                     <span>Amount</span>
                     <span data-i18n="party_type">Type</span>
+                    <span data-i18n="bill_number">Bill No.</span>
                 </div>
                 <div id="payment-history-body">
                     <!-- Payment history will be injected here -->

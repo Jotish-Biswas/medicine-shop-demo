@@ -917,7 +917,22 @@ label {
 }
 
 .payment-history-list .party-item {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+/* Paid Tick Mark */
+.paid-tick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #2196F3;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 8px;
 }
 
 /* Readonly Input */
@@ -925,4 +940,29 @@ label {
     background: var(--table-header-bg) !important;
     color: var(--text-color) !important;
     cursor: not-allowed;
+}
+
+/* Expired and Expiring Soon Dates */
+.expired-date {
+    color: #d32f2f;
+    font-weight: bold;
+    background: #ffebee;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.expiring-soon {
+    color: #f57c00;
+    font-weight: bold;
+    background: #fff3e0;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .expired-date {
+    background: rgba(211, 47, 47, 0.2);
+}
+
+[data-theme="dark"] .expiring-soon {
+    background: rgba(245, 124, 0, 0.2);
 }

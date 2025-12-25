@@ -43,15 +43,44 @@ function addShop(name) {
 }
 
 // Dummy Data for Medicines
-const medicines = [
-    { id: 1, name: 'Napa Extra', company: 'Beximco', form: 'Tablet', price: '2.50', stock: { main: 100, a: 20, b: 15, c: 15, d: 10, e: 5 }, lowStockThreshold: 20 },
-    { id: 2, name: 'Seclo 20', company: 'Square', form: 'Capsule', price: '5.00', stock: { main: 50, a: 5, b: 5, c: 5, d: 2, e: 1 }, lowStockThreshold: 20 },
-    { id: 3, name: 'Maxpro 20', company: 'Renata', form: 'Capsule', price: '7.00', stock: { main: 200, a: 50, b: 30, c: 20, d: 10, e: 10 }, lowStockThreshold: 30 },
-    { id: 4, name: 'Alatrol', company: 'Square', form: 'Tablet', price: '3.00', stock: { main: 30, a: 2, b: 2, c: 1, d: 0, e: 0 }, lowStockThreshold: 10 },
-    { id: 5, name: 'Bizoran', company: 'Incepta', form: 'Tablet', price: '12.00', stock: { main: 60, a: 15, b: 15, c: 15, d: 5, e: 5 }, lowStockThreshold: 15 },
-    { id: 6, name: 'Napa Syrup', company: 'Beximco', form: 'Syrup', price: '35.00', stock: { main: 20, a: 3, b: 3, c: 2, d: 1, e: 1 }, lowStockThreshold: 10 },
-    { id: 7, name: 'Tygacil', company: 'Beximco', form: 'Injection', price: '500.00', stock: { main: 10, a: 2, b: 0, c: 1, d: 0, e: 0 }, lowStockThreshold: 5 },
+let medicines = [
+    { id: 1, name: 'Napa Extra', company: 'Beximco', form: 'Tablet', price: '2.50', stock: { main: 100, a: 20, b: 15, c: 15, d: 10, e: 5 }, lowStockThreshold: 20, mfgDate: '2024-06-15', expDate: '2026-06-15' },
+    { id: 2, name: 'Seclo 20', company: 'Square', form: 'Capsule', price: '5.00', stock: { main: 50, a: 5, b: 5, c: 5, d: 2, e: 1 }, lowStockThreshold: 20, mfgDate: '2024-03-10', expDate: '2026-03-10' },
+    { id: 3, name: 'Maxpro 20', company: 'Renata', form: 'Capsule', price: '7.00', stock: { main: 200, a: 50, b: 30, c: 20, d: 10, e: 10 }, lowStockThreshold: 30, mfgDate: '2024-08-20', expDate: '2026-08-20' },
+    { id: 4, name: 'Alatrol', company: 'Square', form: 'Tablet', price: '3.00', stock: { main: 30, a: 2, b: 2, c: 1, d: 0, e: 0 }, lowStockThreshold: 10, mfgDate: '2024-01-05', expDate: '2026-01-05' },
+    { id: 5, name: 'Bizoran', company: 'Incepta', form: 'Tablet', price: '12.00', stock: { main: 60, a: 15, b: 15, c: 15, d: 5, e: 5 }, lowStockThreshold: 15, mfgDate: '2024-05-12', expDate: '2026-05-12' },
+    { id: 6, name: 'Napa Syrup', company: 'Beximco', form: 'Syrup', price: '35.00', stock: { main: 20, a: 3, b: 3, c: 2, d: 1, e: 1 }, lowStockThreshold: 10, mfgDate: '2024-09-01', expDate: '2025-09-01' },
+    { id: 7, name: 'Tygacil', company: 'Beximco', form: 'Injection', price: '500.00', stock: { main: 10, a: 2, b: 0, c: 1, d: 0, e: 0 }, lowStockThreshold: 5, mfgDate: '2024-11-15', expDate: '2026-11-15' },
 ];
+
+// Load medicines from localStorage if available, otherwise use dummy data
+const savedMedicines = localStorage.getItem('medicines');
+if (savedMedicines) {
+    medicines = JSON.parse(savedMedicines);
+    // Migration: Add mfgDate and expDate to existing medicines without them
+    let needsSave = false;
+    medicines.forEach(med => {
+        if (!med.mfgDate) {
+            // Generate a random manufacture date (6-18 months ago)
+            const monthsAgo = Math.floor(Math.random() * 12) + 6;
+            const mfgDate = new Date();
+            mfgDate.setMonth(mfgDate.getMonth() - monthsAgo);
+            med.mfgDate = mfgDate.toISOString().split('T')[0];
+            needsSave = true;
+        }
+        if (!med.expDate) {
+            // Generate expire date (18-36 months from mfgDate)
+            const mfgDateObj = new Date(med.mfgDate);
+            const monthsToAdd = Math.floor(Math.random() * 18) + 18;
+            mfgDateObj.setMonth(mfgDateObj.getMonth() + monthsToAdd);
+            med.expDate = mfgDateObj.toISOString().split('T')[0];
+            needsSave = true;
+        }
+    });
+    if (needsSave) {
+        localStorage.setItem('medicines', JSON.stringify(medicines));
+    }
+}
 
 // Transaction History (Simulated)
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
@@ -176,10 +205,13 @@ function renderTableHeaders() {
     if (activeShop === 'all') {
         const allShops = getShops();
         const shopHeaders = allShops.map(s => `<th>${s.name}</th>`).join('');
-        headerHTML += shopHeaders + '<th></th>';
+        headerHTML += shopHeaders;
     } else {
-        headerHTML += '<th>Stock</th><th></th>';
+        headerHTML += '<th>Stock</th>';
     }
+    
+    // Add Mfg Date and Exp Date at the end
+    headerHTML += '<th>Mfg Date</th><th>Exp Date</th>';
     
     tr.innerHTML = headerHTML;
     thead.appendChild(tr);
@@ -190,6 +222,16 @@ function createMedicineRow(medicine, index) {
     const activeShop = document.querySelector('.shop-tab.active')?.dataset.shop || 'all';
     const allShops = getShops();
     const totalStock = getTotalStock(medicine);
+
+    // Format dates
+    const mfgDate = medicine.mfgDate ? new Date(medicine.mfgDate).toLocaleDateString() : '-';
+    const expDate = medicine.expDate ? new Date(medicine.expDate).toLocaleDateString() : '-';
+    
+    // Check if expired or expiring soon
+    const today = new Date();
+    const expDateObj = medicine.expDate ? new Date(medicine.expDate) : null;
+    const isExpired = expDateObj && expDateObj < today;
+    const isExpiringSoon = expDateObj && !isExpired && (expDateObj - today) / (1000 * 60 * 60 * 24) <= 30;
 
     let cells = `
         <td>${index + 1}</td>
@@ -234,10 +276,10 @@ function createMedicineRow(medicine, index) {
         `;
     }
 
+    // Add Mfg Date and Exp Date at the end (rightmost)
     cells += `
-        <td>
-            <button class="delete-btn" data-id="${medicine.id}" data-i18n-title="del_med_title"><i class="fas fa-trash-alt"></i></button>
-        </td>
+        <td>${mfgDate}</td>
+        <td class="${isExpired ? 'expired-date' : isExpiringSoon ? 'expiring-soon' : ''}">${expDate}</td>
     `;
     
     tr.innerHTML = cells;
@@ -251,10 +293,13 @@ function createMedicineRow(medicine, index) {
 
 function renderMedicines(filter = '', group = 'all') {
     const allMedicines = getMedicines();
-    const filteredMedicines = allMedicines.filter(m => 
+    let filteredMedicines = allMedicines.filter(m => 
         m.name.toLowerCase().includes(filter.toLowerCase()) ||
         m.company.toLowerCase().includes(filter.toLowerCase())
     );
+
+    // Sort medicines alphabetically by name
+    filteredMedicines.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
     if (!medicineTableBody) return;
     medicineTableBody.innerHTML = '';
@@ -803,6 +848,8 @@ addItemForm.addEventListener('submit', (e) => {
     const name = document.getElementById('new-name').value;
     const company = document.getElementById('new-company').value;
     const price = parseFloat(document.getElementById('new-price').value).toFixed(2);
+    const mfgDate = document.getElementById('new-mfg-date').value;
+    const expDate = document.getElementById('new-exp-date').value;
     
     const stock = {};
     shops.forEach(shop => {
@@ -819,6 +866,8 @@ addItemForm.addEventListener('submit', (e) => {
             med.name = name;
             med.company = company;
             med.price = price;
+            med.mfgDate = mfgDate;
+            med.expDate = expDate;
             
             shops.forEach(shop => {
                 const newStock = stock[shop.id];
@@ -843,6 +892,8 @@ addItemForm.addEventListener('submit', (e) => {
             company: company,
             form: '', // Type removed
             price: price,
+            mfgDate: mfgDate,
+            expDate: expDate,
             stock: stock,
             lowStockThreshold: 10 // Default threshold
         };

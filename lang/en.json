@@ -60,5 +60,8 @@
     "btn_history": "History",
     "btn_delete": "Delete",
     "created_date": "Created",
-    "actions": "Actions"
+    "actions": "Actions",
+    "label_mfg_date": "Manufacture Date",
+    "label_exp_date": "Expire Date",
+    "bill_number": "Bill No."
 }
