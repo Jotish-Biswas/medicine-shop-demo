@@ -3,34 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Medicine Shop</title>
+    <title>Login - Niloy Surgical Shop</title>
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --login-page-bg: #F8FAFC;
-            --login-form-bg: #FFFFFF;
-            --login-btn-color: #2563EB;
-            --login-btn-hover: #1D4ED8;
-            --login-text: #1E293B;
-            --login-text-secondary: #64748B;
-            --login-border: #E2E8F0;
-            --login-input-bg: #F8FAFC;
-        }
-
-        [data-theme="dark"] {
-            --login-page-bg: #0F172A;
-            --login-form-bg: #1E293B;
-            --login-btn-color: #3B82F6;
-            --login-btn-hover: #2563EB;
-            --login-text: #F1F5F9;
-            --login-text-secondary: #94A3B8;
-            --login-border: #334155;
-            --login-input-bg: #0F172A;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -39,535 +19,403 @@
 
         body {
             min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0e17;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background Image - Surgical Equipment */
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1551076805-e1869033e561?w=1920') center/cover no-repeat;
+            z-index: 0;
+        }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 23, 0.6);
+            z-index: 1;
+        }
+
+        /* Main Container */
+        .login-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 2rem;
+            padding-left: 5%;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                justify-content: center;
+                padding-left: 2rem;
+            }
+        }
+
+        /* Glass Card - Very Light Transparent */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* Header */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.3rem;
+        }
+
+        .welcome-text span {
+            color: #00d4ff;
+        }
+
+        .card-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        /* Language Switch - Square Buttons */
+        .lang-switch {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .lang-btn {
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
-            background: var(--login-page-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            position: relative;
-            overflow: hidden;
-            transition: background 0.3s ease;
-        }
-
-        /* Animated Background Shapes */
-        .bg-shapes {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 0;
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            background: var(--login-btn-color);
-            opacity: 0.05;
-            animation: float 20s ease-in-out infinite;
-        }
-
-        .shape:nth-child(1) {
-            width: 400px;
-            height: 400px;
-            top: -100px;
-            right: -100px;
-            animation-delay: 0s;
-        }
-
-        .shape:nth-child(2) {
-            width: 300px;
-            height: 300px;
-            bottom: -50px;
-            left: -50px;
-            animation-delay: -5s;
-        }
-
-        .shape:nth-child(3) {
-            width: 200px;
-            height: 200px;
-            top: 50%;
-            left: 10%;
-            animation-delay: -10s;
-        }
-
-        .shape:nth-child(4) {
-            width: 150px;
-            height: 150px;
-            bottom: 20%;
-            right: 10%;
-            animation-delay: -15s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(30px, -30px) scale(1.1); }
-            50% { transform: translate(-20px, 20px) scale(0.9); }
-            75% { transform: translate(20px, 30px) scale(1.05); }
-        }
-
-        /* Floating Pills Animation */
-        .floating-pills {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 0;
-        }
-
-        .pill {
-            position: absolute;
-            font-size: 2rem;
-            opacity: 0.1;
-            animation: floatUp linear infinite;
-        }
-
-        @keyframes floatUp {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.1;
-            }
-            90% {
-                opacity: 0.1;
-            }
-            100% {
-                transform: translateY(-100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        .login-container {
-            background: var(--login-form-bg);
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            width: 100%;
-            max-width: 420px;
-            overflow: hidden;
-            position: relative;
-            z-index: 1;
-            border: 1px solid var(--login-border);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .login-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.35);
-        }
-
-        .login-header {
-            background: var(--login-btn-color);
-            color: white;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .login-header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .login-header p {
-            opacity: 0.9;
-            font-size: 0.95rem;
-        }
-
-        .login-body {
-            padding: 2rem;
-        }
-
-        .login-form .form-group,
-        .forgot-form .form-group,
-        .reset-form .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .login-form label,
-        .forgot-form label,
-        .reset-form label {
-            display: block;
-            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
             font-weight: 600;
-            color: var(--login-text);
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.4);
+            color: #00d4ff;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
             font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
-        .login-form input,
-        .forgot-form input,
-        .reset-form input {
+        .form-group input {
             width: 100%;
-            padding: 0.9rem 1rem;
-            border: 2px solid var(--login-border);
+            padding: 0.95rem 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
             border-radius: 10px;
-            font-size: 1rem;
-            background: var(--login-input-bg);
-            color: var(--login-text);
-            transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+            font-size: 0.95rem;
+            color: #1e293b;
+            transition: all 0.3s;
+            font-family: inherit;
         }
 
-        .login-form input:hover,
-        .forgot-form input:hover,
-        .reset-form input:hover {
-            border-color: var(--login-btn-color);
-            background: var(--login-form-bg);
-        }
-
-        .login-form input:focus,
-        .forgot-form input:focus,
-        .reset-form input:focus {
+        .form-group input:focus {
             outline: none;
-            border-color: var(--login-btn-color);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
-            background: var(--login-form-bg);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.25);
         }
 
-        .login-form input::placeholder,
-        .forgot-form input::placeholder,
-        .reset-form input::placeholder {
-            color: var(--login-text-secondary);
+        .form-group input::placeholder {
+            color: #94a3b8;
         }
 
+        /* Forgot Password */
+        .forgot-row {
+            text-align: right;
+            margin-bottom: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .forgot-link {
+            color: #00d4ff;
+            font-size: 0.9rem;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Login Button */
         .login-btn {
             width: 100%;
             padding: 1rem;
-            background: var(--login-btn-color);
-            color: white;
+            background: #00d4ff;
+            color: #0a0e17;
             border: none;
             border-radius: 10px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
+            transition: all 0.3s;
+            font-family: inherit;
         }
 
         .login-btn:hover {
-            background: var(--login-btn-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5);
-        }
-
-        .login-btn:hover::before {
-            left: 100%;
+            background: #00e5ff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -8px rgba(0, 212, 255, 0.5);
         }
 
         .login-btn:active {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px -5px rgba(37, 99, 235, 0.4);
+            transform: translateY(0);
         }
 
-        .forgot-password-link {
-            display: block;
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--login-btn-color);
-            text-decoration: none;
-            font-size: 0.95rem;
-            cursor: pointer;
+        /* Messages */
+        .message {
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
             font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .forgot-password-link:hover {
-            text-decoration: underline;
-            color: var(--login-btn-hover);
+            display: none;
         }
 
         .error-message {
-            background: #FEF2F2;
-            color: #DC2626;
-            padding: 0.8rem 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            display: none;
-            border: 1px solid #FECACA;
+            background: rgba(255, 80, 80, 0.15);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 80, 80, 0.25);
         }
 
         .success-message {
-            background: #F0FDF4;
-            color: #16A34A;
-            padding: 0.8rem 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            display: none;
-            border: 1px solid #BBF7D0;
+            background: rgba(40, 200, 130, 0.15);
+            color: #40d9a0;
+            border: 1px solid rgba(40, 200, 130, 0.25);
         }
 
-        [data-theme="dark"] .error-message {
-            background: rgba(220, 38, 38, 0.15);
-            border-color: rgba(220, 38, 38, 0.3);
-        }
-
-        [data-theme="dark"] .success-message {
-            background: rgba(22, 163, 74, 0.15);
-            border-color: rgba(22, 163, 74, 0.3);
-        }
-
-        [data-theme="dark"] .success-message {
-            background: rgba(22, 163, 74, 0.15);
-            border-color: rgba(22, 163, 74, 0.3);
-        }
-
-        .lang-switch {
-            display: flex;
-            justify-content: center;
+        /* Back Link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
             gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .lang-switch .lang-btn {
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--login-border);
-            background: var(--login-form-bg);
-            color: var(--login-text);
-            border-radius: 8px;
-            cursor: pointer;
+            color: rgba(255, 255, 255, 0.5);
             font-size: 0.9rem;
-            transition: all 0.3s;
             font-weight: 500;
-        }
-
-        .lang-switch .lang-btn.active {
-            background: var(--login-btn-color);
-            color: white;
-            border-color: var(--login-btn-color);
-        }
-
-        .theme-toggle-login {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--login-form-bg);
-            border: 1px solid var(--login-border);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            color: var(--login-text);
+            margin-bottom: 1.5rem;
             cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-            z-index: 10;
+            transition: color 0.3s;
         }
 
-        .theme-toggle-login:hover {
-            background: var(--login-btn-color);
-            color: white;
-            border-color: var(--login-btn-color);
-        }
-
-        /* Forgot Password Form */
-        .forgot-form {
-            display: none;
-        }
-
-        .back-to-login {
-            display: block;
-            text-align: center;
-            margin-top: 1rem;
-            color: var(--login-text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .back-to-login:hover {
-            color: var(--login-btn-color);
+        .back-link:hover {
+            color: #00d4ff;
         }
 
         /* OTP Input */
-        .otp-input-group {
+        .otp-group {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
             justify-content: center;
-            margin: 1rem 0;
+            margin: 1.5rem 0;
         }
 
         .otp-input {
-            width: 50px !important;
-            height: 50px;
+            width: 55px !important;
+            height: 58px;
+            padding: 0 !important;
             text-align: center;
             font-size: 1.5rem !important;
-            font-weight: bold;
-            padding: 0 !important;
+            font-weight: 700;
+            border-radius: 10px !important;
         }
 
-        .otp-sent-message {
+        .otp-timer {
             text-align: center;
-            color: var(--login-text);
-            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
             margin-bottom: 1rem;
         }
 
-        .otp-sent-message strong {
-            color: var(--login-btn-color);
+        .resend-btn {
+            background: none;
+            border: none;
+            color: #00d4ff;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
         }
 
-        /* Reset Password Form */
-        .reset-form {
+        .resend-btn:disabled {
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+        }
+
+        /* Hidden Forms */
+        .forgot-form-container, .reset-form-container {
             display: none;
-        }
-
-        .demo-notice {
-            background: #FEF3C7;
-            color: #D97706;
-            padding: 0.8rem;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            text-align: center;
-            border: 1px solid #FDE68A;
-        }
-
-        [data-theme="dark"] .demo-notice {
-            background: rgba(217, 119, 6, 0.15);
-            border-color: rgba(217, 119, 6, 0.3);
-        }
-
-        .login-icon {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Form instruction text */
-        .forgot-form p,
-        .reset-form p,
-        .form-instruction {
-            color: var(--login-text);
-            font-size: 0.95rem;
-            line-height: 1.5;
         }
     </style>
 </head>
 <body>
-    <!-- Background Shapes -->
-    <div class="bg-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
-    
-    <!-- Floating Pills Background -->
-    <div class="floating-pills" id="floating-pills"></div>
-    
-    <button class="theme-toggle-login" id="theme-toggle-login">🌙 Theme</button>
-    
+    <!-- Background -->
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <!-- Main Container -->
     <div class="login-container">
-        <div class="login-header">
-            <div class="login-icon">💊</div>
-            <h1 data-i18n="login_title">Medicine Shop</h1>
-            
-        </div>
-        
-        <div class="login-body">
-            <!-- Language Switch -->
-            <div class="lang-switch">
-                <button class="lang-btn active" data-lang="en">EN</button>
-                <button class="lang-btn" data-lang="bn">বাংলা</button>
-            </div>
+        <!-- Glass Card -->
+        <div class="glass-card">
             <!-- Login Form -->
-            <form class="login-form" id="login-form">
-                <div class="error-message" id="login-error"></div>
-                
-                <div class="form-group">
-                    <label for="email" data-i18n="login_email">Email</label>
-                    <input type="email" id="email" placeholder="example@gmail.com" required>
+            <div id="login-form-container">
+                <div class="card-header">
+                    <div>
+                        <p class="welcome-text">Welcome to <span>Niloy Surgical Shop</span></p>
+                    </div>
+                    <div class="lang-switch">
+                        <button class="lang-btn active" data-lang="en">EN</button>
+                        <button class="lang-btn" data-lang="bn">বাং</button>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="password" data-i18n="login_password">Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required minlength="4">
-                </div>
-                
-                <button type="submit" class="login-btn" data-i18n="login_btn">Login</button>
-                
-                <a class="forgot-password-link" id="show-forgot" data-i18n="forgot_password">Forgot Password?</a>
-            </form>
+                <h1 class="card-title" data-i18n="sign_in">Sign in</h1>
+
+                <form id="login-form">
+                    <div class="message error-message" id="login-error"></div>
+                    
+                    <div class="form-group">
+                        <label for="email" data-i18n="email_label">Enter your username or email address</label>
+                        <input type="email" id="email" placeholder="Username or email address" data-i18n-placeholder="email_placeholder" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" data-i18n="password_label">Enter your Password</label>
+                        <input type="password" id="password" placeholder="Password" data-i18n-placeholder="password_placeholder" required>
+                    </div>
+                    
+                    <div class="forgot-row">
+                        <a class="forgot-link" id="show-forgot" data-i18n="forgot_password">Forgot Password</a>
+                    </div>
+                    
+                    <button type="submit" class="login-btn" data-i18n="sign_in_btn">Sign in</button>
+                </form>
+            </div>
 
             <!-- Forgot Password Form -->
-            <form class="forgot-form" id="forgot-form">
-                <div class="error-message" id="forgot-error"></div>
-                <div class="success-message" id="forgot-success"></div>
+            <div class="forgot-form-container" id="forgot-form-container">
+                <a class="back-link" id="back-to-login">
+                    <span>←</span>
+                    <span data-i18n="back_to_login">Back to Login</span>
+                </a>
                 
-                <p class="form-instruction" style="text-align: center; margin-bottom: 1rem;" data-i18n="forgot_instruction">
-                    Enter your email to receive a verification code.
-                </p>
-                
-                <div class="form-group">
-                    <label for="forgot-email" data-i18n="login_email">Email</label>
-                    <input type="email" id="forgot-email" placeholder="example@gmail.com" required>
+                <div class="card-header">
+                    <div>
+                        <p class="welcome-text">Reset your <span>Password</span></p>
+                    </div>
                 </div>
+                <h1 class="card-title" data-i18n="forgot_password_title">Forgot Password</h1>
                 
-                <button type="submit" class="login-btn" id="send-code-btn" data-i18n="send_code_btn">Send Code</button>
+                <div class="message error-message" id="forgot-error"></div>
+                <div class="message success-message" id="forgot-success"></div>
                 
-                <a class="back-to-login" id="back-to-login-1" data-i18n="back_to_login">← Back to Login</a>
-            </form>
-
-            <!-- OTP Verification Form -->
-            <form class="forgot-form" id="otp-form" style="display: none;">
-                <div class="error-message" id="otp-error"></div>
-                
-                <div class="success-message" style="display: block;" data-i18n="otp_sent_success">
-                    ✅ Verification code sent to your email!
-                </div>
-                
-                <p class="otp-sent-message">
-                    <span data-i18n="otp_sent_to">Code sent to: </span>
-                    <strong id="otp-email-display"></strong>
-                </p>
-                
-                <div class="form-group">
-                    <label for="otp-code" data-i18n="enter_otp">Enter Verification Code</label>
-                    <input type="text" id="otp-code" placeholder="Enter 6-digit code" required pattern="[0-9]{6}" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 0.5rem;">
-                </div>
-                
-                <button type="submit" class="login-btn" data-i18n="verify_btn">Verify</button>
-                
-                <a class="back-to-login" id="back-to-login-2" data-i18n="back_to_login">← Back to Login</a>
-            </form>
+                <form id="forgot-form">
+                    <div class="form-group">
+                        <label for="forgot-email" data-i18n="enter_email">Enter your email address</label>
+                        <input type="email" id="forgot-email" placeholder="Email address" data-i18n-placeholder="email_address" required>
+                    </div>
+                    
+                    <button type="submit" class="login-btn" data-i18n="send_otp">Send OTP</button>
+                </form>
+            </div>
 
             <!-- Reset Password Form -->
-            <form class="reset-form" id="reset-form">
-                <div class="error-message" id="reset-error"></div>
-                <div class="success-message" id="reset-success"></div>
+            <div class="reset-form-container" id="reset-form-container">
+                <a class="back-link" id="back-to-forgot">
+                    <span>←</span>
+                    <span data-i18n="back">Back</span>
+                </a>
                 
-                <p class="form-instruction" style="text-align: center; margin-bottom: 1rem;" data-i18n="reset_instruction">
-                    Enter your new password.
-                </p>
-                
-                <div class="form-group">
-                    <label for="new-password" data-i18n="new_password">New Password</label>
-                    <input type="password" id="new-password" placeholder="••••••••" required minlength="4">
+                <div class="card-header">
+                    <div>
+                        <p class="welcome-text">Create new <span>Password</span></p>
+                    </div>
                 </div>
+                <h1 class="card-title" data-i18n="reset_password">Reset Password</h1>
                 
-                <div class="form-group">
-                    <label for="confirm-password" data-i18n="confirm_password">Confirm Password</label>
-                    <input type="password" id="confirm-password" placeholder="••••••••" required minlength="4">
-                </div>
+                <div class="message error-message" id="reset-error"></div>
+                <div class="message success-message" id="reset-success"></div>
                 
-                <button type="submit" class="login-btn" data-i18n="reset_password_btn">Reset Password</button>
-            </form>
+                <form id="reset-form">
+                    <div class="form-group">
+                        <label data-i18n="enter_otp">Enter OTP</label>
+                        <div class="otp-group">
+                            <input type="text" class="form-group input otp-input" maxlength="1" id="otp-1">
+                            <input type="text" class="form-group input otp-input" maxlength="1" id="otp-2">
+                            <input type="text" class="form-group input otp-input" maxlength="1" id="otp-3">
+                            <input type="text" class="form-group input otp-input" maxlength="1" id="otp-4">
+                        </div>
+                    </div>
+                    
+                    <div class="otp-timer">
+                        <span id="timer-text">Resend OTP in <span id="countdown">60</span>s</span>
+                        <button type="button" class="resend-btn" id="resend-btn" disabled data-i18n="resend_otp">Resend OTP</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-password" data-i18n="new_password">New Password</label>
+                        <input type="password" id="new-password" placeholder="Enter new password" data-i18n-placeholder="new_password_placeholder" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm-password" data-i18n="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm-password" placeholder="Confirm new password" data-i18n-placeholder="confirm_password_placeholder" required>
+                    </div>
+                    
+                    <button type="submit" class="login-btn" data-i18n="reset_password_btn">Reset Password</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -576,369 +424,327 @@
         // SUPABASE CONFIGURATION
         // =============================================
         const SUPABASE_URL = 'https://pmassayjacceepanxbkt.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_0yzWWlhaciJs8LYYjrlkcw_-ethAqLx';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYXNzYXlqYWNjZWVwYW54Ymt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NTU2MTMsImV4cCI6MjA4MjIzMTYxM30.-TjfMNsXU7exNsLKBxb3SbNF4uFK5o8NghA43V8m4b0';
+        const supabaseLogin = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // =============================================
-        // EMAILJS CONFIGURATION
-        // =============================================
-        const EMAILJS_SERVICE_ID = 'service_qcdbwnb';
-        const EMAILJS_TEMPLATE_ID = 'template_gcxgxjj';
-        const EMAILJS_PUBLIC_KEY = 'TjkYlfoBu1ks-Ewea';
-
-        // Initialize EmailJS
-        emailjs.init(EMAILJS_PUBLIC_KEY);
-
-        // =============================================
-        // TRANSLATIONS
+        // LANGUAGE
         // =============================================
         const translations = {
             en: {
-                login_title: "Medicine Shop",
-                login_subtitle: "Inventory Management System",
-                login_email: "Email",
-                login_password: "Password",
-                login_btn: "Login",
-                logging_in: "Logging in...",
-                forgot_password: "Forgot Password?",
-                forgot_instruction: "Enter your email to receive a verification code.",
-                send_code_btn: "Send Code",
-                sending_code: "Sending...",
-                back_to_login: "← Back to Login",
-                otp_sent_to: "Code sent to: ",
-                otp_sent_success: "✅ Verification code sent to your email!",
-                enter_otp: "Enter Verification Code",
-                verify_btn: "Verify",
-                reset_instruction: "Enter your new password.",
-                new_password: "New Password",
-                confirm_password: "Confirm Password",
+                sign_in: "Sign in",
+                sign_in_btn: "Sign in",
+                email_label: "Enter your username or email address",
+                email_placeholder: "Username or email address",
+                password_label: "Enter your Password",
+                password_placeholder: "Password",
+                forgot_password: "Forgot Password",
+                back_to_login: "Back to Login",
+                forgot_password_title: "Forgot Password",
+                enter_email: "Enter your email address",
+                email_address: "Email address",
+                send_otp: "Send OTP",
+                back: "Back",
+                reset_password: "Reset Password",
                 reset_password_btn: "Reset Password",
-                error_invalid_credentials: "Invalid email or password!",
-                error_email_not_found: "This email is not registered!",
-                error_invalid_otp: "Invalid verification code!",
-                error_password_mismatch: "Passwords do not match!",
-                error_email_failed: "Failed to send email. Please try again.",
-                success_code_sent: "Verification code sent successfully!",
-                success_password_reset: "Password reset successfully! Redirecting to login..."
+                enter_otp: "Enter OTP",
+                new_password: "New Password",
+                new_password_placeholder: "Enter new password",
+                confirm_password: "Confirm Password",
+                confirm_password_placeholder: "Confirm new password",
+                resend_otp: "Resend OTP"
             },
             bn: {
-                login_title: "ঔষধের দোকান",
-                login_subtitle: "ইনভেন্টরি ম্যানেজমেন্ট সিস্টেম",
-                login_email: "ইমেইল",
-                login_password: "পাসওয়ার্ড",
-                login_btn: "লগইন",
-                forgot_password: "পাসওয়ার্ড ভুলে গেছেন?",
-                logging_in: "লগইন হচ্ছে...",
-                forgot_instruction: "ভেরিফিকেশন কোড পেতে আপনার ইমেইল দিন।",
-                send_code_btn: "কোড পাঠান",
-                sending_code: "পাঠানো হচ্ছে...",
-                back_to_login: "← লগইনে ফিরুন",
-                otp_sent_to: "কোড পাঠানো হয়েছে: ",
-                otp_sent_success: "✅ ভেরিফিকেশন কোড আপনার ইমেইলে পাঠানো হয়েছে!",
-                enter_otp: "ভেরিফিকেশন কোড দিন",
-                verify_btn: "যাচাই করুন",
-                reset_instruction: "আপনার নতুন পাসওয়ার্ড দিন।",
-                new_password: "নতুন পাসওয়ার্ড",
-                confirm_password: "পাসওয়ার্ড নিশ্চিত করুন",
+                sign_in: "সাইন ইন",
+                sign_in_btn: "সাইন ইন",
+                email_label: "আপনার ইউজারনেম বা ইমেইল লিখুন",
+                email_placeholder: "ইউজারনেম বা ইমেইল",
+                password_label: "আপনার পাসওয়ার্ড লিখুন",
+                password_placeholder: "পাসওয়ার্ড",
+                forgot_password: "পাসওয়ার্ড ভুলে গেছেন",
+                back_to_login: "লগইনে ফিরুন",
+                forgot_password_title: "পাসওয়ার্ড ভুলে গেছেন",
+                enter_email: "আপনার ইমেইল লিখুন",
+                email_address: "ইমেইল",
+                send_otp: "OTP পাঠান",
+                back: "ফিরুন",
+                reset_password: "পাসওয়ার্ড রিসেট",
                 reset_password_btn: "পাসওয়ার্ড রিসেট",
-                error_invalid_credentials: "ভুল ইমেইল বা পাসওয়ার্ড!",
-                error_email_not_found: "এই ইমেইল রেজিস্টার্ড নয়!",
-                error_invalid_otp: "ভুল ভেরিফিকেশন কোড!",
-                error_password_mismatch: "পাসওয়ার্ড মিলছে না!",
-                error_email_failed: "ইমেইল পাঠাতে ব্যর্থ। আবার চেষ্টা করুন।",
-                success_code_sent: "ভেরিফিকেশন কোড সফলভাবে পাঠানো হয়েছে!",
-                success_password_reset: "পাসওয়ার্ড সফলভাবে রিসেট হয়েছে! লগইনে যাচ্ছে..."
+                enter_otp: "OTP লিখুন",
+                new_password: "নতুন পাসওয়ার্ড",
+                new_password_placeholder: "নতুন পাসওয়ার্ড লিখুন",
+                confirm_password: "পাসওয়ার্ড নিশ্চিত করুন",
+                confirm_password_placeholder: "পাসওয়ার্ড আবার লিখুন",
+                resend_otp: "আবার OTP পাঠান"
             }
         };
 
-        let currentLang = localStorage.getItem('language') || 'en';
+        let currentLang = localStorage.getItem('lang') || 'en';
 
         function applyTranslations(lang) {
-            currentLang = lang;
-            localStorage.setItem('language', lang);
-            
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (translations[lang][key]) {
+                if (translations[lang]?.[key]) {
                     el.textContent = translations[lang][key];
                 }
             });
-
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.lang === lang);
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[lang]?.[key]) {
+                    el.placeholder = translations[lang][key];
+                }
             });
         }
 
-        function getText(key) {
-            return translations[currentLang][key] || key;
-        }
-
-        // =============================================
-        // THEME TOGGLE
-        // =============================================
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-        }
-
-        document.getElementById('theme-toggle-login').addEventListener('click', () => {
-            if (document.body.getAttribute('data-theme') === 'dark') {
-                document.body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            if (btn.dataset.lang === currentLang) {
+                btn.classList.add('active');
             } else {
-                document.body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
+                btn.classList.remove('active');
             }
-        });
-
-        // =============================================
-        // FORM ELEMENTS
-        // =============================================
-        const loginForm = document.getElementById('login-form');
-        const forgotForm = document.getElementById('forgot-form');
-        const otpForm = document.getElementById('otp-form');
-        const resetForm = document.getElementById('reset-form');
-
-        const loginError = document.getElementById('login-error');
-        const forgotError = document.getElementById('forgot-error');
-        const forgotSuccess = document.getElementById('forgot-success');
-        const otpError = document.getElementById('otp-error');
-        const resetError = document.getElementById('reset-error');
-        const resetSuccess = document.getElementById('reset-success');
-
-        let currentOTP = '';
-        let currentEmail = '';
-
-        // =============================================
-        // SHOW/HIDE FORMS
-        // =============================================
-        function showForm(formToShow) {
-            loginForm.style.display = 'none';
-            forgotForm.style.display = 'none';
-            otpForm.style.display = 'none';
-            resetForm.style.display = 'none';
-
-            formToShow.style.display = 'block';
-
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.style.display = 'none';
-            });
-        }
-
-        document.getElementById('show-forgot').addEventListener('click', (e) => {
-            e.preventDefault();
-            showForm(forgotForm);
-        });
-
-        document.getElementById('back-to-login-1').addEventListener('click', (e) => {
-            e.preventDefault();
-            showForm(loginForm);
-        });
-
-        document.getElementById('back-to-login-2').addEventListener('click', (e) => {
-            e.preventDefault();
-            showForm(loginForm);
-        });
-
-        // =============================================
-        // LOGIN (Using Supabase)
-        // =============================================
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
             
-            const email = document.getElementById('email').value.toLowerCase().trim();
-            const password = document.getElementById('password').value;
-            const loginBtn = loginForm.querySelector('.login-btn');
-            const originalText = loginBtn.textContent;
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLang = btn.dataset.lang;
+                localStorage.setItem('lang', currentLang);
+                applyTranslations(currentLang);
+            });
+        });
 
-            // Show loading
-            loginBtn.disabled = true;
-            loginBtn.textContent = getText('logging_in') || 'Logging in...';
+        applyTranslations(currentLang);
+
+        // =============================================
+        // FORM NAVIGATION
+        // =============================================
+        const loginFormContainer = document.getElementById('login-form-container');
+        const forgotFormContainer = document.getElementById('forgot-form-container');
+        const resetFormContainer = document.getElementById('reset-form-container');
+
+        document.getElementById('show-forgot').addEventListener('click', () => {
+            loginFormContainer.style.display = 'none';
+            forgotFormContainer.style.display = 'block';
+        });
+
+        document.getElementById('back-to-login').addEventListener('click', () => {
+            forgotFormContainer.style.display = 'none';
+            loginFormContainer.style.display = 'block';
+        });
+
+        document.getElementById('back-to-forgot').addEventListener('click', () => {
+            resetFormContainer.style.display = 'none';
+            forgotFormContainer.style.display = 'block';
+        });
+
+        // =============================================
+        // LOGIN FORM
+        // =============================================
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('login-error');
+
+            errorDiv.style.display = 'none';
 
             try {
-                // Query Supabase
-                const { data, error } = await supabaseClient
+                const { data, error } = await supabaseLogin
                     .from('accounts')
                     .select('*')
-                    .eq('email', email)
+                    .eq('email', email.toLowerCase())
                     .eq('password', password)
                     .single();
 
                 if (error || !data) {
-                    loginError.textContent = getText('error_invalid_credentials');
-                    loginError.style.display = 'block';
-                } else {
-                    // Login successful
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('loggedInUser', JSON.stringify(data));
-                    window.location.href = 'index.html';
+                    errorDiv.textContent = currentLang === 'bn' ? 'ইমেইল বা পাসওয়ার্ড ভুল' : 'Invalid email or password';
+                    errorDiv.style.display = 'block';
+                    return;
                 }
+
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('loggedInUser', JSON.stringify(data));
+                window.location.href = 'index.html';
             } catch (err) {
-                console.error('Login error:', err);
-                loginError.textContent = getText('error_invalid_credentials');
-                loginError.style.display = 'block';
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.textContent = originalText;
+                errorDiv.textContent = currentLang === 'bn' ? 'লগইন ব্যর্থ হয়েছে' : 'Login failed. Please try again.';
+                errorDiv.style.display = 'block';
             }
         });
 
         // =============================================
-        // FORGOT PASSWORD - SEND CODE VIA EMAIL
+        // FORGOT PASSWORD - OTP
         // =============================================
-        forgotForm.addEventListener('submit', async (e) => {
+        let generatedOTP = '';
+        let resetEmail = '';
+        let countdownInterval;
+
+        // Initialize EmailJS
+        emailjs.init("TjkYlfoBu1ks-Ewea");
+
+        document.getElementById('forgot-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const email = document.getElementById('forgot-email').value.toLowerCase().trim();
+            const email = document.getElementById('forgot-email').value;
+            const errorDiv = document.getElementById('forgot-error');
+            const successDiv = document.getElementById('forgot-success');
 
-            // Check if email exists in Supabase
-            const { data: account, error } = await supabaseClient
-                .from('accounts')
-                .select('*')
-                .eq('email', email)
-                .single();
-
-            if (error || !account) {
-                forgotError.textContent = getText('error_email_not_found');
-                forgotError.style.display = 'block';
-                forgotSuccess.style.display = 'none';
-                return;
-            }
-
-            // Generate 6-digit OTP
-            currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            currentEmail = email;
-
-            // Disable button while sending
-            const sendBtn = document.getElementById('send-code-btn');
-            const originalText = sendBtn.textContent;
-            sendBtn.disabled = true;
-            sendBtn.textContent = getText('sending_code');
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
 
             try {
-                // Send email via EmailJS
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                const { data, error } = await supabaseLogin
+                    .from('accounts')
+                    .select('id, email, name')
+                    .eq('email', email.toLowerCase())
+                    .single();
+
+                if (error || !data) {
+                    errorDiv.textContent = currentLang === 'bn' ? 'ইমেইল পাওয়া যায়নি' : 'Email not found';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+                resetEmail = email;
+
+                await emailjs.send("service_qcdbwnb", "template_gcxgxjj", {
                     to_email: email,
-                    otp_code: currentOTP
+                    to_name: data.name || 'User',
+                    otp_code: generatedOTP,
+                    message: `Your OTP code is: ${generatedOTP}`
                 });
 
-                // Show OTP form
-                document.getElementById('otp-email-display').textContent = email;
-                showForm(otpForm);
-                
-            } catch (error) {
-                console.error('EmailJS Error:', error);
-                forgotError.textContent = getText('error_email_failed');
-                forgotError.style.display = 'block';
-            } finally {
-                sendBtn.disabled = false;
-                sendBtn.textContent = originalText;
-            }
-        });
-
-        // =============================================
-        // VERIFY OTP
-        // =============================================
-        otpForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const enteredOTP = document.getElementById('otp-code').value;
-
-            if (enteredOTP === currentOTP) {
-                showForm(resetForm);
-            } else {
-                otpError.textContent = getText('error_invalid_otp');
-                otpError.style.display = 'block';
-            }
-        });
-
-        // =============================================
-        // RESET PASSWORD (Using Supabase)
-        // =============================================
-        resetForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            const resetBtn = resetForm.querySelector('.login-btn');
-
-            if (newPassword !== confirmPassword) {
-                resetError.textContent = getText('error_password_mismatch');
-                resetError.style.display = 'block';
-                resetSuccess.style.display = 'none';
-                return;
-            }
-
-            resetBtn.disabled = true;
-            resetBtn.textContent = 'Updating...';
-
-            try {
-                // Update password in Supabase
-                const { error } = await supabaseClient
-                    .from('accounts')
-                    .update({ password: newPassword })
-                    .eq('email', currentEmail);
-
-                if (error) throw error;
-
-                resetError.style.display = 'none';
-                resetSuccess.textContent = getText('success_password_reset');
-                resetSuccess.style.display = 'block';
+                successDiv.textContent = currentLang === 'bn' ? 'OTP আপনার ইমেইলে পাঠানো হয়েছে!' : 'OTP sent to your email!';
+                successDiv.style.display = 'block';
 
                 setTimeout(() => {
-                    showForm(loginForm);
-                }, 2000);
+                    forgotFormContainer.style.display = 'none';
+                    resetFormContainer.style.display = 'block';
+                    startCountdown();
+                }, 1500);
+
             } catch (err) {
-                console.error('Password reset error:', err);
-                resetError.textContent = 'Failed to update password. Please try again.';
-                resetError.style.display = 'block';
-            } finally {
-                resetBtn.disabled = false;
-                resetBtn.textContent = getText('reset_password_btn');
+                errorDiv.textContent = currentLang === 'bn' ? 'OTP পাঠাতে ব্যর্থ হয়েছে' : 'Failed to send OTP. Please try again.';
+                errorDiv.style.display = 'block';
+                console.error(err);
             }
         });
 
-        // =============================================
-        // LANGUAGE SWITCH
-        // =============================================
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                applyTranslations(btn.dataset.lang);
+        // OTP Input Navigation
+        const otpInputs = document.querySelectorAll('.otp-input');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
             });
         });
 
-        // =============================================
-        // CHECK IF ALREADY LOGGED IN
-        // =============================================
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            window.location.href = 'index.html';
+        // Countdown Timer
+        function startCountdown() {
+            let timeLeft = 60;
+            const countdownEl = document.getElementById('countdown');
+            const timerText = document.getElementById('timer-text');
+            const resendBtn = document.getElementById('resend-btn');
+
+            resendBtn.disabled = true;
+            timerText.style.display = 'inline';
+
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                countdownEl.textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    timerText.style.display = 'none';
+                    resendBtn.disabled = false;
+                }
+            }, 1000);
         }
 
-        // =============================================
-        // FLOATING PILLS ANIMATION
-        // =============================================
-        function createFloatingPills() {
-            const container = document.getElementById('floating-pills');
-            const pills = ['💊', '💉', '🩺', '🏥', '⚕️', '🩹', '🧪', '🔬', '❤️‍🩹', '🧬'];
-            
-            for (let i = 0; i < 20; i++) {
-                const pill = document.createElement('div');
-                pill.className = 'pill';
-                pill.textContent = pills[Math.floor(Math.random() * pills.length)];
-                pill.style.left = Math.random() * 100 + '%';
-                pill.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
-                pill.style.animationDuration = (Math.random() * 15 + 10) + 's';
-                pill.style.animationDelay = (Math.random() * 10) + 's';
-                container.appendChild(pill);
+        // Resend OTP
+        document.getElementById('resend-btn').addEventListener('click', async () => {
+            if (!resetEmail) return;
+
+            try {
+                generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+
+                await emailjs.send("service_qcdbwnb", "template_gcxgxjj", {
+                    to_email: resetEmail,
+                    to_name: 'User',
+                    otp_code: generatedOTP,
+                    message: `Your new OTP code is: ${generatedOTP}`
+                });
+
+                document.getElementById('reset-success').textContent = currentLang === 'bn' ? 'নতুন OTP পাঠানো হয়েছে!' : 'New OTP sent!';
+                document.getElementById('reset-success').style.display = 'block';
+                startCountdown();
+
+            } catch (err) {
+                document.getElementById('reset-error').textContent = currentLang === 'bn' ? 'OTP পাঠাতে ব্যর্থ' : 'Failed to resend OTP';
+                document.getElementById('reset-error').style.display = 'block';
             }
-        }
-        
-        createFloatingPills();
+        });
 
-        // =============================================
-        // INITIALIZE
-        // =============================================
-        applyTranslations(currentLang);
+        // Reset Password Form
+        document.getElementById('reset-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const enteredOTP = Array.from(otpInputs).map(input => input.value).join('');
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const errorDiv = document.getElementById('reset-error');
+            const successDiv = document.getElementById('reset-success');
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            if (enteredOTP !== generatedOTP) {
+                errorDiv.textContent = currentLang === 'bn' ? 'ভুল OTP' : 'Invalid OTP';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                errorDiv.textContent = currentLang === 'bn' ? 'পাসওয়ার্ড মিলছে না' : 'Passwords do not match';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (newPassword.length < 4) {
+                errorDiv.textContent = currentLang === 'bn' ? 'পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে' : 'Password must be at least 4 characters';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const { error } = await supabaseLogin
+                    .from('accounts')
+                    .update({ password: newPassword })
+                    .eq('email', resetEmail.toLowerCase());
+
+                if (error) throw error;
+
+                successDiv.textContent = currentLang === 'bn' ? 'পাসওয়ার্ড রিসেট সফল! রিডাইরেক্ট হচ্ছে...' : 'Password reset successful! Redirecting...';
+                successDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    resetFormContainer.style.display = 'none';
+                    loginFormContainer.style.display = 'block';
+                    otpInputs.forEach(input => input.value = '');
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                }, 2000);
+
+            } catch (err) {
+                errorDiv.textContent = currentLang === 'bn' ? 'পাসওয়ার্ড রিসেট ব্যর্থ' : 'Failed to reset password';
+                errorDiv.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 // SUPABASE CONFIGURATION
 // =============================================
 const SUPABASE_URL = 'https://pmassayjacceepanxbkt.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_0yzWWlhaciJs8LYYjrlkcw_-ethAqLx';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYXNzYXlqYWNjZWVwYW54Ymt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NTU2MTMsImV4cCI6MjA4MjIzMTYxM30.-TjfMNsXU7exNsLKBxb3SbNF4uFK5o8NghA43V8m4b0';
 
 // Use existing supabase client or create new one
 let supabaseClient;
@@ -505,7 +505,7 @@ function createMedicineRow(medicine, index) {
         </td>
         <td>${medicine.company}</td>
         <td>
-            <input type="number" class="price-input" data-id="${medicine.id}" value="${medicine.price}" step="0.01" min="0">
+            <input type="number" class="price-input" data-id="${medicine.id}" value="${medicine.price}" step="0.01" min="0" style="width: ${Math.max(80, 20 + (String(medicine.price).length * 12))}px">
         </td>
         <td style="font-weight: bold; text-align: center;">${totalStock}</td>
         <td>${mfgDate}</td>
@@ -761,6 +761,15 @@ if (medicineTableBody) {
             const len = value.length || 1;
             const newWidth = 20 + (len * 14); 
             input.style.width = `${Math.max(120, newWidth)}px`;
+        }
+        
+        // Auto-expand price input based on digits
+        if (e.target.classList.contains('price-input')) {
+            const input = e.target;
+            const value = input.value;
+            const len = value.length || 1;
+            const newWidth = 20 + (len * 12); 
+            input.style.width = `${Math.max(80, newWidth)}px`;
         }
     });
 } // End of medicineTableBody check

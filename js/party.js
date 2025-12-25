@@ -1,32 +1,142 @@
-// Party (Debtor/Creditor) Management with Payment History
-let partyTransactions = JSON.parse(localStorage.getItem('partyTransactions')) || [];
+// Party (Debtor/Creditor) Management with Supabase Integration
+let partyTransactions = [];
 
-// Migration: Convert old format to new format if needed
-partyTransactions = partyTransactions.map(t => {
-    if (!t.payments) {
-        // Old format - convert to new
-        const payments = [];
-        if (t.paid > 0) {
-            payments.push({
-                id: Date.now(),
-                amount: t.paid,
-                type: t.type || 'Cash',
-                date: t.date
-            });
+// Load parties from Supabase
+async function loadPartiesFromDb() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('parties')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Get payments for each party
+        for (let party of data) {
+            const { data: payments } = await supabaseClient
+                .from('party_payments')
+                .select('*')
+                .eq('party_id', party.id)
+                .order('date', { ascending: false });
+
+            party.payments = payments || [];
         }
-        return {
-            id: t.id,
-            category: t.category,
-            name: t.name,
-            due: t.due,
-            createdDate: t.date,
-            payments: payments
-        };
-    }
-    return t;
-});
-savePartyTransactions();
 
+        // Convert to local format
+        partyTransactions = data.map(p => ({
+            id: p.id,
+            category: p.type,
+            name: p.name,
+            due: p.total_due,
+            createdDate: p.created_at,
+            payments: p.payments.map(pay => ({
+                id: pay.id,
+                amount: pay.amount,
+                type: pay.payment_type || 'Cash',
+                date: pay.date,
+                billNumber: pay.bill_number || ''
+            }))
+        }));
+
+        console.log('✅ Parties loaded from Supabase:', partyTransactions.length);
+        return partyTransactions;
+    } catch (err) {
+        console.error('Failed to load parties:', err);
+        // Fallback to localStorage
+        partyTransactions = JSON.parse(localStorage.getItem('partyTransactions')) || [];
+        return partyTransactions;
+    }
+}
+
+// Save party to Supabase
+async function savePartyToDb(party) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('parties')
+            .insert({
+                name: party.name,
+                type: party.category,
+                total_due: party.due,
+                created_at: party.createdDate
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        console.log('✅ Party saved to Supabase:', data.id);
+        return { success: true, data };
+    } catch (err) {
+        console.error('Failed to save party:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+// Add payment to Supabase
+async function savePaymentToDb(partyId, payment) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('party_payments')
+            .insert({
+                party_id: partyId,
+                amount: payment.amount,
+                payment_type: payment.type,
+                date: payment.date,
+                bill_number: payment.billNumber || null
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        console.log('✅ Payment saved to Supabase:', data.id);
+        return { success: true, data };
+    } catch (err) {
+        console.error('Failed to save payment:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+// Delete party from Supabase
+async function deletePartyFromDb(partyId) {
+    try {
+        // First delete all payments
+        await supabaseClient
+            .from('party_payments')
+            .delete()
+            .eq('party_id', partyId);
+
+        // Then delete party
+        const { error } = await supabaseClient
+            .from('parties')
+            .delete()
+            .eq('id', partyId);
+
+        if (error) throw error;
+        console.log('✅ Party deleted from Supabase:', partyId);
+        return { success: true };
+    } catch (err) {
+        console.error('Failed to delete party:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+// Delete payment from Supabase
+async function deletePaymentFromDb(paymentId) {
+    try {
+        const { error } = await supabaseClient
+            .from('party_payments')
+            .delete()
+            .eq('id', paymentId);
+
+        if (error) throw error;
+        console.log('✅ Payment deleted from Supabase:', paymentId);
+        return { success: true };
+    } catch (err) {
+        console.error('Failed to delete payment:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+// Local save for backup
 function savePartyTransactions() {
     localStorage.setItem('partyTransactions', JSON.stringify(partyTransactions));
 }
@@ -217,7 +327,7 @@ function populatePartyYearDropdown() {
     }
 }
 
-function openPartyModal(category) {
+async function openPartyModal(category) {
     partyModalTitle.textContent = category === 'debtor' ? 'Debtors' : 'Creditors';
     partyCategoryInput.value = category;
 
@@ -226,6 +336,9 @@ function openPartyModal(category) {
     populatePartyYearDropdown();
     partyYearDropdown.value = now.getFullYear();
 
+    // Load fresh data from database
+    await loadPartiesFromDb();
+    
     renderPartyTransactions(category);
     partyModal.classList.add('show');
 }
@@ -267,6 +380,7 @@ function renderPartyTransactions(category) {
             <span class="party-actions">
                 ${presentDue > 0 ? `<button class="action-btn pay-btn add-payment-btn" data-id="${t.id}" data-i18n="btn_pay">Pay</button>` : ''}
                 <button class="action-btn history-btn view-history-btn" data-id="${t.id}" data-i18n="btn_history">History</button>
+                <button class="action-btn delete-btn delete-party-btn" data-id="${t.id}" title="Delete">🗑️</button>
             </span>
         `;
         partyListBody.appendChild(item);
@@ -278,6 +392,9 @@ function renderPartyTransactions(category) {
     });
     document.querySelectorAll('.view-history-btn').forEach(btn => {
         btn.addEventListener('click', () => openHistoryModal(btn.dataset.id));
+    });
+    document.querySelectorAll('.delete-party-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteParty(btn.dataset.id));
     });
 }
 
@@ -327,15 +444,21 @@ function openHistoryModal(partyId) {
         sortedPayments.forEach(p => {
             const item = document.createElement('div');
             item.className = 'party-item';
-            item.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
+            item.style.gridTemplateColumns = '1fr 1fr 1fr 1fr 0.5fr';
             const pDate = new Date(p.date);
             item.innerHTML = `
                 <span>${pDate.toLocaleDateString()}</span>
                 <span class="payment-amount">৳${p.amount.toFixed(2)}</span>
                 <span>${p.type}</span>
                 <span>${p.billNumber || '-'}</span>
+                <button class="action-btn delete-btn delete-payment-btn" data-party-id="${party.id}" data-payment-id="${p.id}" title="Delete">🗑️</button>
             `;
             historyBody.appendChild(item);
+        });
+
+        // Add delete payment listeners
+        document.querySelectorAll('.delete-payment-btn').forEach(btn => {
+            btn.addEventListener('click', () => deletePayment(btn.dataset.partyId, btn.dataset.paymentId));
         });
     }
 
@@ -343,98 +466,138 @@ function openHistoryModal(partyId) {
 }
 
 // Delete a payment
-function deletePayment(partyId, paymentId) {
+async function deletePayment(partyId, paymentId) {
     if (!confirm('Are you sure you want to delete this payment?')) return;
 
-    const party = partyTransactions.find(t => t.id == partyId);
-    if (party) {
-        party.payments = party.payments.filter(p => p.id != paymentId);
-        savePartyTransactions();
+    // Delete from Supabase
+    const result = await deletePaymentFromDb(paymentId);
+    
+    if (result.success) {
+        const party = partyTransactions.find(t => t.id == partyId);
+        if (party) {
+            party.payments = party.payments.filter(p => p.id != paymentId);
+            savePartyTransactions(); // Backup to localStorage
+        }
         openHistoryModal(partyId); // Refresh history
         renderPartyTransactions(partyCategoryInput.value); // Refresh main list
+    } else {
+        alert('Failed to delete payment: ' + result.error);
     }
 }
 
 // Delete a party
-function deleteParty(partyId) {
+async function deleteParty(partyId) {
     if (!confirm('Are you sure you want to delete this party and all its payment history?')) return;
 
-    partyTransactions = partyTransactions.filter(t => t.id != partyId);
-    savePartyTransactions();
-    renderPartyTransactions(partyCategoryInput.value);
+    // Delete from Supabase
+    const result = await deletePartyFromDb(partyId);
+    
+    if (result.success) {
+        partyTransactions = partyTransactions.filter(t => t.id != partyId);
+        savePartyTransactions(); // Backup to localStorage
+        renderPartyTransactions(partyCategoryInput.value);
+    } else {
+        alert('Failed to delete party: ' + result.error);
+    }
 }
 
 // Event Listeners
-debtorBtn.addEventListener('click', () => openPartyModal('debtor'));
-creditorBtn.addEventListener('click', () => openPartyModal('creditor'));
-closePartyModalBtn.addEventListener('click', () => partyModal.classList.remove('show'));
+if (debtorBtn) debtorBtn.addEventListener('click', () => openPartyModal('debtor'));
+if (creditorBtn) creditorBtn.addEventListener('click', () => openPartyModal('creditor'));
+if (closePartyModalBtn) closePartyModalBtn.addEventListener('click', () => partyModal.classList.remove('show'));
 
-partyMonthDropdown.addEventListener('change', () => renderPartyTransactions(partyCategoryInput.value));
-partyYearDropdown.addEventListener('change', () => renderPartyTransactions(partyCategoryInput.value));
-downloadPartyPdfBtn.addEventListener('click', downloadPartyPDF);
+if (partyMonthDropdown) partyMonthDropdown.addEventListener('change', () => renderPartyTransactions(partyCategoryInput.value));
+if (partyYearDropdown) partyYearDropdown.addEventListener('change', () => renderPartyTransactions(partyCategoryInput.value));
+if (downloadPartyPdfBtn) downloadPartyPdfBtn.addEventListener('click', downloadPartyPDF);
 
 // Add New Party
-addPartyTransactionBtn.addEventListener('click', () => {
-    addPartyTransactionForm.reset();
-    document.getElementById('party-transaction-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('party-edit-id').value = '';
-    document.getElementById('add-party-modal-title').textContent = 'Add New Party';
-    addPartyTransactionModal.classList.add('show');
-});
+if (addPartyTransactionBtn) {
+    addPartyTransactionBtn.addEventListener('click', () => {
+        addPartyTransactionForm.reset();
+        document.getElementById('party-transaction-date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('party-edit-id').value = '';
+        document.getElementById('add-party-modal-title').textContent = 'Add New Party';
+        addPartyTransactionModal.classList.add('show');
+    });
+}
 
-cancelAddPartyTransactionBtn.addEventListener('click', () => {
-    addPartyTransactionModal.classList.remove('show');
-});
+if (cancelAddPartyTransactionBtn) {
+    cancelAddPartyTransactionBtn.addEventListener('click', () => {
+        addPartyTransactionModal.classList.remove('show');
+    });
+}
 
-addPartyTransactionForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const newParty = {
-        id: Date.now(),
-        category: partyCategoryInput.value,
-        name: document.getElementById('party-name').value,
-        due: parseFloat(document.getElementById('party-due').value) || 0,
-        createdDate: document.getElementById('party-transaction-date').value || new Date().toISOString().split('T')[0],
-        payments: []
-    };
+if (addPartyTransactionForm) {
+    addPartyTransactionForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const newParty = {
+            category: partyCategoryInput.value,
+            name: document.getElementById('party-name').value,
+            due: parseFloat(document.getElementById('party-due').value) || 0,
+            createdDate: document.getElementById('party-transaction-date').value || new Date().toISOString().split('T')[0],
+            payments: []
+        };
 
-    partyTransactions.push(newParty);
-    savePartyTransactions();
-    renderPartyTransactions(newParty.category);
-    addPartyTransactionModal.classList.remove('show');
-});
+        // Save to Supabase
+        const result = await savePartyToDb(newParty);
+        
+        if (result.success) {
+            newParty.id = result.data.id;
+            partyTransactions.push(newParty);
+            savePartyTransactions(); // Backup to localStorage
+            renderPartyTransactions(newParty.category);
+            addPartyTransactionModal.classList.remove('show');
+        } else {
+            alert('Failed to save party: ' + result.error);
+        }
+    });
+}
 
 // Add Payment Form
-cancelPaymentBtn.addEventListener('click', () => {
-    addPaymentModal.classList.remove('show');
-});
-
-addPaymentForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const partyId = document.getElementById('payment-party-id').value;
-    const party = partyTransactions.find(t => t.id == partyId);
-    
-    if (party) {
-        const payment = {
-            id: Date.now(),
-            amount: parseFloat(document.getElementById('payment-amount').value) || 0,
-            type: document.getElementById('payment-type').value,
-            date: document.getElementById('payment-date').value,
-            billNumber: document.getElementById('payment-bill-number').value || ''
-        };
-        
-        party.payments.push(payment);
-        savePartyTransactions();
-        renderPartyTransactions(partyCategoryInput.value);
+if (cancelPaymentBtn) {
+    cancelPaymentBtn.addEventListener('click', () => {
         addPaymentModal.classList.remove('show');
-    }
-});
+    });
+}
+
+if (addPaymentForm) {
+    addPaymentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const partyId = document.getElementById('payment-party-id').value;
+        const party = partyTransactions.find(t => t.id == partyId);
+        
+        if (party) {
+            const payment = {
+                amount: parseFloat(document.getElementById('payment-amount').value) || 0,
+                type: document.getElementById('payment-type').value,
+                date: document.getElementById('payment-date').value,
+                billNumber: document.getElementById('payment-bill-number').value || ''
+            };
+            
+            // Save to Supabase
+            const result = await savePaymentToDb(partyId, payment);
+            
+            if (result.success) {
+                payment.id = result.data.id;
+                party.payments.push(payment);
+                savePartyTransactions(); // Backup to localStorage
+                renderPartyTransactions(partyCategoryInput.value);
+                addPaymentModal.classList.remove('show');
+            } else {
+                alert('Failed to save payment: ' + result.error);
+            }
+        }
+    });
+}
 
 // Close History Modal
-closeHistoryBtn.addEventListener('click', () => {
-    paymentHistoryModal.classList.remove('show');
-});
+if (closeHistoryBtn) {
+    closeHistoryBtn.addEventListener('click', () => {
+        paymentHistoryModal.classList.remove('show');
+    });
+}
 
 // Close modals on outside click
 window.addEventListener('click', (e) => {
@@ -443,3 +606,6 @@ window.addEventListener('click', (e) => {
     if (e.target === addPaymentModal) addPaymentModal.classList.remove('show');
     if (e.target === paymentHistoryModal) paymentHistoryModal.classList.remove('show');
 });
+
+// Initial load
+loadPartiesFromDb();

@@ -2,7 +2,7 @@
 // SUPABASE CONFIGURATION
 // =============================================
 const SUPABASE_URL = 'https://pmassayjacceepanxbkt.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_0yzWWlhaciJs8LYYjrlkcw_-ethAqLx';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYXNzYXlqYWNjZWVwYW54Ymt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NTU2MTMsImV4cCI6MjA4MjIzMTYxM30.-TjfMNsXU7exNsLKBxb3SbNF4uFK5o8NghA43V8m4b0';
 
 // Initialize Supabase Client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
