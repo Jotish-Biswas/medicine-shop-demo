@@ -164,7 +164,24 @@ async function loadTransactions() {
             .order('date', { ascending: false });
 
         if (error) throw error;
-        transactions = data || [];
+        // Map DB rows to the local transaction shape used by the UI
+        transactions = (data || []).map(row => {
+            // Find medicine name from loaded medicines if available
+            const med = medicines.find(m => m.id === row.medicine_id || m.id === parseInt(row.medicine_id));
+            const medicineName = med ? med.name : (row.medicine_name || row.medicineName || 'Unknown');
+
+            // Shop: prefer shop_id, fallback to shop
+            const shop = row.shop_id || row.shop || row.shopId || 'all';
+
+            return {
+                type: row.type,
+                quantity: row.quantity,
+                price: row.price,
+                shop: shop,
+                medicineName: medicineName,
+                date: row.date || row.created_at || new Date().toISOString()
+            };
+        });
         console.log('✅ Transactions loaded:', transactions.length);
     } catch (err) {
         console.error('Error loading transactions:', err);
@@ -277,12 +294,33 @@ async function updateMedicineInDb(id, updates) {
 
 async function deleteMedicineFromDb(id) {
     try {
+        // Remove related transactions first to avoid foreign key constraint errors
+        try {
+            await supabaseClient
+                .from('transactions')
+                .delete()
+                .eq('medicine_id', id);
+        } catch (txErr) {
+            console.warn('Could not delete related transactions (may not exist):', txErr.message || txErr);
+        }
+
+        // Remove related stock entries
+        try {
+            await supabaseClient
+                .from('stock')
+                .delete()
+                .eq('medicine_id', id);
+        } catch (stockErr) {
+            console.warn('Could not delete related stock entries (may not exist):', stockErr.message || stockErr);
+        }
+
         const { error } = await supabaseClient
             .from('medicines')
             .delete()
             .eq('id', id);
 
         if (error) throw error;
+
         return { success: true };
     } catch (err) {
         console.error('Error deleting medicine:', err);
@@ -325,7 +363,7 @@ async function updateStockInDb(medicineId, shopId, quantity) {
 
 async function logTransactionToDb(type, quantity, price, shopId, medicineId) {
     try {
-        const { error } = await supabaseClient
+        const { data, error } = await supabaseClient
             .from('transactions')
             .insert({
                 medicine_id: medicineId,
@@ -333,10 +371,16 @@ async function logTransactionToDb(type, quantity, price, shopId, medicineId) {
                 type: type,
                 quantity: parseInt(quantity),
                 price: parseFloat(price)
-            });
+            })
+            .select();
 
         if (error) throw error;
-        return { success: true };
+
+        console.log('✅ Transaction saved to DB:', {
+            medicineId, shopId, type, quantity: parseInt(quantity), price: parseFloat(price), inserted: data && data.length ? data[0] : null
+        });
+
+        return { success: true, data };
     } catch (err) {
         console.error('Error logging transaction:', err);
         return { success: false, error: err.message };
@@ -378,9 +422,12 @@ function logTransaction(type, quantity, price, shop, medicineName, medicineId) {
         date: new Date().toISOString()
     };
     transactions.push(transaction);
-    
+    console.log('Local transaction pushed:', transaction, 'Total transactions (local):', transactions.length);
+
     // Also save to Supabase
-    logTransactionToDb(type, quantity, price, shop, medicineId);
+    logTransactionToDb(type, quantity, price, shop, medicineId).then(res => {
+        if (!res.success) console.error('Failed to save transaction to DB:', res.error);
+    });
 }
 
 function getStats() {

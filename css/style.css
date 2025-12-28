@@ -304,7 +304,6 @@ select:focus {
     z-index: 2500;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-}
 
 /* Main Grid Layout */
 /* Only medicine list scrolls, everything else is static */
@@ -324,23 +323,10 @@ select:focus {
     box-shadow: var(--shadow);
     border: 1px solid var(--card-border);
     min-width: 1200px;
-}
     max-height: calc(100vh - 180px);
     overflow-y: auto;
     overflow-x: auto;
     position: relative;
-}
-
-/* Table Styles */
-#medicine-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--card-border);
-    min-width: 1200px;
 }
 
 #medicine-table th,
@@ -512,7 +498,8 @@ select:focus {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    /* Ensure modals are always above header/quick-actions/table headers */
+    z-index: 5000;
     left: 0;
     top: 0;
     width: 100%;
@@ -538,6 +525,7 @@ select:focus {
     border: 1px solid var(--card-border);
     display: flex;
     flex-direction: column;
+    z-index: 5001; /* ensure modal content is above overlay and other elements */
 }
 
 /* Vertical Stock Control */
