@@ -49,16 +49,20 @@ body {
 
 /* Header */
 header {
+    --header-height: 72px;
     position: sticky;
     top: 0;
+    left: 0;
+    width: 100vw;
     background-color: var(--bg-color); /* Match body bg for clean look */
-    padding: 1rem;
-    z-index: 100;
+    padding: 1rem 0;
+    z-index: 3000; /* keep header above quick actions */
     display: flex;
     flex-direction: column;
     gap: 1rem;
     border-bottom: 1px solid var(--card-border);
-}
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+ }
 
 .header-top {
     display: flex;
@@ -283,24 +287,48 @@ select:focus {
 }
 
 /* Quick Actions Bar */
+/* Quick Actions Bar - sticky below header */
 .quick-actions-bar {
+    --quick-actions-height: 56px;
     display: flex;
     justify-content: center;
     gap: 0.75rem;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 0;
     flex-wrap: wrap;
     background-color: var(--card-bg);
     border-bottom: 1px solid var(--card-border);
+    position: sticky;
+    top: var(--header-height);
+    left: 0;
+    width: 100vw;
+    z-index: 2500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
 }
 
 /* Main Grid Layout */
+/* Only medicine list scrolls, everything else is static */
 #medicine-list-container {
     padding: 0 1rem 1rem 1rem;
     max-width: 1400px;
     margin: 0 auto;
+}
+
+/* Table Styles */
+#medicine-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
+    min-width: 1200px;
+}
     max-height: calc(100vh - 180px);
     overflow-y: auto;
     overflow-x: auto;
+    position: relative;
 }
 
 /* Table Styles */
@@ -323,6 +351,13 @@ select:focus {
     vertical-align: middle;
 }
 
+/* Name column - auto width based on content */
+#medicine-table td:nth-child(2),
+#medicine-table th:nth-child(2) {
+    white-space: nowrap;
+}
+
+/* Table header sticky below quick actions bar */
 #medicine-table thead th {
     background-color: #00695C;
     font-weight: 700;
@@ -331,9 +366,36 @@ select:focus {
     font-size: 0.8rem;
     letter-spacing: 0.5px;
     position: sticky;
-    top: 0;
-    z-index: 20;
+    top: calc(var(--header-height) + var(--quick-actions-height));
+    z-index: 1200;
     border-bottom: 2px solid #004D40;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 56px;
+    min-height: 56px;
+    background-clip: padding-box;
+}
+/* Sticky Footer */
+.footer-bar {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    background: var(--card-bg);
+    border-top: 1px solid var(--card-border);
+    z-index: 2000;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+    padding: 0.5rem 0;
+}
+
+.footer-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    padding: 0 1.5rem;
 }
 
 #medicine-table tr:last-child td {
@@ -563,6 +625,22 @@ select:focus {
 
 .form-row .form-group {
     flex: 1;
+}
+
+/* Date Select Row for MM/YY */
+.date-select-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.date-select-row select {
+    flex: 1;
+    padding: 0.8rem;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-size: 0.95rem;
 }
 
 label {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niloy Surgical Shop</title>
+    <title>Niloy Surgical</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/party.css">
     <!-- Supabase SDK -->
@@ -18,7 +18,7 @@
 <body>
     <header>
         <div class="header-top">
-            <h1 data-i18n="app_title">Niloy Surgical Shop</h1>
+            <h1 data-i18n="app_title">Niloy Surgical</h1>
             <div class="controls">
                 <button id="alert-btn" class="icon-btn" aria-label="Alerts" style="width: auto; padding-right: 1rem;">
                     ⚠️ <span data-i18n="alerts_btn" style="margin-left: 0.5rem; font-size: 0.9rem;">Alerts</span>
@@ -95,6 +95,13 @@
         </div>
     </main>
 
+    <!-- Sticky Footer -->
+    <footer class="footer-bar">
+        <div class="footer-content">
+            <span>&copy; 2025 Niloy Surgical. All rights reserved.</span>
+        </div>
+    </footer>
+
     <!-- Modals -->
     <!-- Add Item Modal -->
     <div id="add-item-modal" class="modal">
@@ -115,12 +122,50 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="new-mfg-date" data-i18n="label_mfg_date">Manufacture Date</label>
-                        <input type="date" id="new-mfg-date" required>
+                        <label data-i18n="label_mfg_date">Manufacture Date (MM/YY)</label>
+                        <div class="date-select-row">
+                            <select id="new-mfg-month" required>
+                                <option value="">Month</option>
+                                <option value="01">01 - Jan</option>
+                                <option value="02">02 - Feb</option>
+                                <option value="03">03 - Mar</option>
+                                <option value="04">04 - Apr</option>
+                                <option value="05">05 - May</option>
+                                <option value="06">06 - Jun</option>
+                                <option value="07">07 - Jul</option>
+                                <option value="08">08 - Aug</option>
+                                <option value="09">09 - Sep</option>
+                                <option value="10">10 - Oct</option>
+                                <option value="11">11 - Nov</option>
+                                <option value="12">12 - Dec</option>
+                            </select>
+                            <select id="new-mfg-year" required>
+                                <option value="">Year</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="new-exp-date" data-i18n="label_exp_date">Expire Date</label>
-                        <input type="date" id="new-exp-date" required>
+                        <label data-i18n="label_exp_date">Expire Date (MM/YY)</label>
+                        <div class="date-select-row">
+                            <select id="new-exp-month" required>
+                                <option value="">Month</option>
+                                <option value="01">01 - Jan</option>
+                                <option value="02">02 - Feb</option>
+                                <option value="03">03 - Mar</option>
+                                <option value="04">04 - Apr</option>
+                                <option value="05">05 - May</option>
+                                <option value="06">06 - Jun</option>
+                                <option value="07">07 - Jul</option>
+                                <option value="08">08 - Aug</option>
+                                <option value="09">09 - Sep</option>
+                                <option value="10">10 - Oct</option>
+                                <option value="11">11 - Nov</option>
+                                <option value="12">12 - Dec</option>
+                            </select>
+                            <select id="new-exp-year" required>
+                                <option value="">Year</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 
@@ -159,8 +204,10 @@
     <div id="delete-medicine-modal" class="modal">
         <div class="modal-content">
             <h2>Delete Medicine</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Select the medicine to delete. This will remove it from all shops.</p>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Search and select the medicine to delete. This will remove it from all shops.</p>
             <div class="form-group">
+                <label for="delete-med-search">Search Medicine</label>
+                <input type="text" id="delete-med-search" placeholder="Type medicine name or company..." style="width: 100%; padding: 0.8rem; border: 1px solid var(--card-border); border-radius: 6px; background: var(--input-bg); color: var(--text-color); margin-bottom: 0.5rem;">
                 <label for="delete-med-select">Select Medicine (Name - Company)</label>
                 <select id="delete-med-select" style="width: 100%; padding: 0.8rem; border: 1px solid var(--card-border); border-radius: 6px; background: var(--input-bg); color: var(--text-color);">
                     <!-- Options injected by JS -->

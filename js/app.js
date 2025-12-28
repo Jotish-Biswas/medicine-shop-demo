@@ -482,8 +482,8 @@ function renderTableHeaders() {
     thead.innerHTML = '';
     const tr = document.createElement('tr');
 
-    // Mfg Date and Exp Date now come right after Total Stock
-    const headers = ['#', 'Name', 'Company', 'Price', 'Total Stock', 'Mfg Date', 'Exp Date'];
+    // MFG and EXP now come right after Total Stock (MM/YY format)
+    const headers = ['#', 'Name', 'Company', 'Price', 'Total Stock', 'MFG', 'EXP'];
     const activeShop = document.querySelector('.shop-tab.active')?.dataset.shop || 'all';
 
     let headerHTML = headers.map(h => `<th>${h}</th>`).join('');
@@ -506,9 +506,16 @@ function createMedicineRow(medicine, index) {
     const allShops = getShops();
     const totalStock = getTotalStock(medicine);
 
-    // Format dates
-    const mfgDate = medicine.mfgDate ? new Date(medicine.mfgDate).toLocaleDateString() : '-';
-    const expDate = medicine.expDate ? new Date(medicine.expDate).toLocaleDateString() : '-';
+    // Format dates as MM/YY
+    const formatDateMMYY = (dateStr) => {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr);
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = String(d.getFullYear()).slice(-2);
+        return `${month}/${year}`;
+    };
+    const mfgDate = formatDateMMYY(medicine.mfgDate);
+    const expDate = formatDateMMYY(medicine.expDate);
     
     // Check if expired or expiring soon
     const today = new Date();
@@ -1334,8 +1341,15 @@ if (addItemForm) {
         const name = document.getElementById('new-name').value;
         const company = document.getElementById('new-company').value;
         const price = parseFloat(document.getElementById('new-price').value).toFixed(2);
-        const mfgDate = document.getElementById('new-mfg-date').value;
-        const expDate = document.getElementById('new-exp-date').value;
+        
+        // Get MM/YY values from select boxes and convert to date string
+        const mfgMonth = document.getElementById('new-mfg-month').value;
+        const mfgYear = document.getElementById('new-mfg-year').value;
+        const expMonth = document.getElementById('new-exp-month').value;
+        const expYear = document.getElementById('new-exp-year').value;
+        
+        const mfgDate = mfgMonth && mfgYear ? `${mfgYear}-${mfgMonth}-01` : null;
+        const expDate = expMonth && expYear ? `${expYear}-${expMonth}-01` : null;
         
         const stock = {};
         shops.forEach(shop => {
@@ -1417,6 +1431,38 @@ if (addItemForm) {
     addItemForm.reset();
     });
 } // End of addItemForm check
+
+// Populate Year Dropdowns for MFG and EXP dates
+function populateYearDropdowns() {
+    const mfgYearSelect = document.getElementById('new-mfg-year');
+    const expYearSelect = document.getElementById('new-exp-year');
+    
+    if (!mfgYearSelect || !expYearSelect) return;
+    
+    const currentYear = new Date().getFullYear();
+    // MFG years: 5 years back to current year
+    // EXP years: current year to 10 years ahead
+    
+    // Clear existing options except first placeholder
+    mfgYearSelect.innerHTML = '<option value="">Year</option>';
+    expYearSelect.innerHTML = '<option value="">Year</option>';
+    
+    // MFG: 2010 to 3000
+    for (let y = 2010; y <= 3000; y++) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        mfgYearSelect.appendChild(option);
+    }
+    
+    // EXP: 2025 to 3000
+    for (let y = 2025; y <= 3000; y++) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        expYearSelect.appendChild(option);
+    }
+}
 
 // Render Shop Inputs in Add Modal
 function renderShopInputs() {
@@ -1543,43 +1589,56 @@ if (confirmDeleteShopBtn) {
     });
 }
 
-// Delete Medicine Logic
+// Delete Medicine Modal Logic with Search
+const deleteMedSearch = document.getElementById('delete-med-search');
 const deleteMedBtn = document.getElementById('delete-medicine-btn');
 const deleteMedModal = document.getElementById('delete-medicine-modal');
 const deleteMedSelect = document.getElementById('delete-med-select');
 const confirmDeleteMedBtn = document.getElementById('confirm-delete-med-btn');
 const cancelDeleteMedBtn = document.getElementById('cancel-delete-med-btn');
 
+function renderDeleteMedOptions(filter = '') {
+    if (!deleteMedSelect) return;
+    deleteMedSelect.innerHTML = '';
+    const filtered = medicines
+        .filter(med =>
+            med.name.toLowerCase().includes(filter.toLowerCase()) ||
+            med.company.toLowerCase().includes(filter.toLowerCase())
+        );
+    if (filtered.length === 0) {
+        const option = document.createElement('option');
+        option.textContent = "No medicines found";
+        deleteMedSelect.appendChild(option);
+        confirmDeleteMedBtn.disabled = true;
+    } else {
+        confirmDeleteMedBtn.disabled = false;
+        filtered.forEach(med => {
+            const option = document.createElement('option');
+            option.value = med.id;
+            option.textContent = `${med.name} - ${med.company}`;
+            deleteMedSelect.appendChild(option);
+        });
+    }
+}
+
 if (deleteMedBtn) {
     deleteMedBtn.addEventListener('click', () => {
-        // Populate dropdown with Name - Company
-        deleteMedSelect.innerHTML = '';
-        
-        // Sort medicines alphabetically by name for easier finding
-        const sortedMeds = [...medicines].sort((a, b) => a.name.localeCompare(b.name));
-        
-        if (sortedMeds.length === 0) {
-            const option = document.createElement('option');
-            option.textContent = "No medicines available";
-            deleteMedSelect.appendChild(option);
-            confirmDeleteMedBtn.disabled = true;
-        } else {
-            confirmDeleteMedBtn.disabled = false;
-            sortedMeds.forEach(med => {
-                const option = document.createElement('option');
-                option.value = med.id;
-                option.textContent = `${med.name} - ${med.company}`;
-                deleteMedSelect.appendChild(option);
-            });
-        }
-
+        if (!deleteMedModal) return;
+        renderDeleteMedOptions();
+        if (deleteMedSearch) deleteMedSearch.value = '';
         deleteMedModal.classList.add('show');
+    });
+}
+
+if (deleteMedSearch) {
+    deleteMedSearch.addEventListener('input', (e) => {
+        renderDeleteMedOptions(e.target.value);
     });
 }
 
 if (cancelDeleteMedBtn) {
     cancelDeleteMedBtn.addEventListener('click', () => {
-        deleteMedModal.classList.remove('show');
+        if (deleteMedModal) deleteMedModal.classList.remove('show');
     });
 }
 
@@ -1627,14 +1686,45 @@ async function initApp() {
     console.log('📦 Data loaded - Shops:', shops.length, 'Medicines:', medicines.length);
     
     // Now render UI
+    populateYearDropdowns();
     renderShopInputs();
     renderShopTabs();
     renderShopDropdown();
     renderTableHeaders();
     renderMedicines();
+    // Update CSS vars for sticky heights
+    updateStickyHeights();
     
     console.log('✅ App initialized!');
 }
 
 // Start the app
 initApp();
+
+// Update CSS variables for header and quick actions heights so sticky tops don't overlap
+function updateStickyHeights() {
+    try {
+        const headerEl = document.querySelector('header');
+        const quickEl = document.querySelector('.quick-actions-bar');
+        const root = document.documentElement;
+        if (headerEl) {
+            const h = headerEl.getBoundingClientRect().height;
+            root.style.setProperty('--header-height', `${Math.ceil(h)}px`);
+        }
+        if (quickEl) {
+            const q = quickEl.getBoundingClientRect().height;
+            root.style.setProperty('--quick-actions-height', `${Math.ceil(q)}px`);
+        }
+    } catch (err) {
+        console.warn('Could not update sticky heights:', err);
+    }
+}
+
+window.addEventListener('resize', () => {
+    updateStickyHeights();
+});
+
+// Run once after DOM content fully loaded (in case images/fonts changed sizes)
+window.addEventListener('load', () => {
+    setTimeout(updateStickyHeights, 50);
+});

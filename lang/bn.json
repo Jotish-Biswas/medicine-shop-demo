@@ -1,5 +1,5 @@
 {
-    "app_title": "নীলয় সার্জিক্যাল শপ",
+    "app_title": "নীলয় সার্জিক্যাল",
     "search_placeholder": "ঔষধ খুঁজুন...",
     "stock_label": "মজুদ:",
     "price_label": "দাম:",
@@ -61,8 +61,8 @@
     "btn_delete": "মুছুন",
     "created_date": "তারিখ",
     "actions": "কার্যকরী",
-    "label_mfg_date": "তৈরির তারিখ",
-    "label_exp_date": "মেয়াদ উত্তীর্ণের তারিখ",
+    "label_mfg_date": "তৈরির তারিখ (MM/YY)",
+    "label_exp_date": "মেয়াদ (MM/YY)",
     "bill_number": "বিল নম্বর",
     "logout": "লগ আউট"
 }

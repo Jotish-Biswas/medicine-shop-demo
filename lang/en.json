@@ -1,5 +1,5 @@
 {
-    "app_title": "Niloy Surgical Shop",
+    "app_title": "Niloy Surgical",
     "search_placeholder": "Search medicine...",
     "stock_label": "Stock:",
     "price_label": "Price:",
@@ -61,8 +61,8 @@
     "btn_delete": "Delete",
     "created_date": "Created",
     "actions": "Actions",
-    "label_mfg_date": "Manufacture Date",
-    "label_exp_date": "Expire Date",
+    "label_mfg_date": "MFG Date (MM/YY)",
+    "label_exp_date": "EXP Date (MM/YY)",
     "bill_number": "Bill No.",
     "logout": "Logout"
 }
