@@ -1,8 +1,8 @@
 // =============================================
 // SUPABASE CONFIGURATION
 // =============================================
-const SUPABASE_URL = 'https://pmassayjacceepanxbkt.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYXNzYXlqYWNjZWVwYW54Ymt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NTU2MTMsImV4cCI6MjA4MjIzMTYxM30.-TjfMNsXU7exNsLKBxb3SbNF4uFK5o8NghA43V8m4b0';
+const SUPABASE_URL = 'https://forfciiqmuhvuowhzgrz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvcmZjaWlxbXVodnVvd2h6Z3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MzU3ODcsImV4cCI6MjA4MzExMTc4N30.dPmQC0zec0IVKTdbLXsg4evXPjrmkAIaciAmJ-QW3k0';
 
 // =============================================
 // AUTH CHECK - Redirect to login if not logged in
