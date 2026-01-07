@@ -1,5 +1,6 @@
 // Party (Debtor/Creditor) Management with Supabase Integration
 let partyTransactions = [];
+let lastSearchTerm = ''; // Track search term for filtering
 
 // Load parties from Supabase
 async function loadPartiesFromDb() {
@@ -330,6 +331,12 @@ function populatePartyYearDropdown() {
 async function openPartyModal(category) {
     partyModalTitle.textContent = category === 'debtor' ? 'Debtors' : 'Creditors';
     partyCategoryInput.value = category;
+    
+    // Clear search input when opening modal
+    lastSearchTerm = '';
+    if (partySearchInput) {
+        partySearchInput.value = '';
+    }
 
     const now = new Date();
     partyMonthDropdown.value = now.getMonth() + 1;
@@ -351,9 +358,14 @@ function renderPartyTransactions(category) {
 
     const filtered = partyTransactions.filter(t => {
         const tDate = new Date(t.createdDate);
-        return t.category === category &&
+        const matchesDate = t.category === category &&
                tDate.getMonth() + 1 === month &&
                tDate.getFullYear() === year;
+        
+        // Add search filter
+        const matchesSearch = t.name.toLowerCase().includes(lastSearchTerm.toLowerCase());
+        
+        return matchesDate && matchesSearch;
     });
 
     filtered.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
@@ -508,6 +520,16 @@ if (closePartyModalBtn) closePartyModalBtn.addEventListener('click', () => party
 
 if (partyMonthDropdown) partyMonthDropdown.addEventListener('change', () => renderPartyTransactions(partyCategoryInput.value));
 if (partyYearDropdown) partyYearDropdown.addEventListener('change', () => renderPartyTransactions(partyCategoryInput.value));
+
+// Search functionality
+const partySearchInput = document.getElementById('party-search-input');
+if (partySearchInput) {
+    partySearchInput.addEventListener('input', (e) => {
+        lastSearchTerm = e.target.value;
+        renderPartyTransactions(partyCategoryInput.value);
+    });
+}
+
 if (downloadPartyPdfBtn) downloadPartyPdfBtn.addEventListener('click', downloadPartyPDF);
 
 // Add New Party

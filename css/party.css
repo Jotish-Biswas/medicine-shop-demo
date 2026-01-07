@@ -41,6 +41,32 @@
     background-color: var(--table-header-bg);
 }
 
+.party-search-wrapper {
+    flex: 1;
+    min-width: 200px;
+}
+
+.party-search-input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.party-search-input:focus {
+    outline: none;
+    border-color: #008b7b;
+    box-shadow: 0 0 0 3px rgba(0, 139, 123, 0.1);
+}
+
+.party-search-input::placeholder {
+    color: var(--text-secondary);
+}
+
 .date-filter-group {
     display: flex;
     gap: 0.5rem;
