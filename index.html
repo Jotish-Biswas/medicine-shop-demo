@@ -494,6 +494,32 @@
         </div>
     </div>
 
+    <!-- Add More Due Modal -->
+    <div id="add-more-due-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <h2>Add More Due - <span id="add-due-party-name"></span></h2>
+            <form id="add-more-due-form">
+                <div class="form-group">
+                    <label for="add-due-current">Current Total Due (৳)</label>
+                    <input type="text" id="add-due-current" readonly class="readonly-input">
+                </div>
+                <div class="form-group">
+                    <label for="add-due-amount">Additional Amount (৳)</label>
+                    <input type="number" id="add-due-amount" step="0.01" required min="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="add-due-date" data-i18n="date">Date</label>
+                    <input type="date" id="add-due-date" required>
+                </div>
+                <input type="hidden" id="add-due-party-id">
+                <div class="form-actions">
+                    <button type="button" id="cancel-add-due-btn" class="secondary-btn">Cancel</button>
+                    <button type="submit" class="primary-btn">Add Amount</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Amount Input Modal -->
     <div id="amount-modal" class="modal">
         <div class="modal-content" style="max-width: 350px;">

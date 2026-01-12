@@ -137,6 +137,23 @@ async function deletePaymentFromDb(paymentId) {
     }
 }
 
+// Update party total due in Supabase
+async function updatePartyDueInDb(partyId, newTotalDue) {
+    try {
+        const { error } = await supabaseClient
+            .from('parties')
+            .update({ total_due: newTotalDue })
+            .eq('id', partyId);
+
+        if (error) throw error;
+        console.log('✅ Party due updated in Supabase:', partyId);
+        return { success: true };
+    } catch (err) {
+        console.error('Failed to update party due:', err);
+        return { success: false, error: err.message };
+    }
+}
+
 // Local save for backup
 function savePartyTransactions() {
     localStorage.setItem('partyTransactions', JSON.stringify(partyTransactions));
@@ -169,6 +186,11 @@ const downloadPartyPdfBtn = document.getElementById('download-party-pdf-btn');
 const addPaymentModal = document.getElementById('add-payment-modal');
 const addPaymentForm = document.getElementById('add-payment-form');
 const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
+
+// Add More Due Modal Elements
+const addMoreDueModal = document.getElementById('add-more-due-modal');
+const addMoreDueForm = document.getElementById('add-more-due-form');
+const cancelAddDueBtn = document.getElementById('cancel-add-due-btn');
 
 // History Modal Elements
 const paymentHistoryModal = document.getElementById('payment-history-modal');
@@ -391,6 +413,7 @@ function renderPartyTransactions(category) {
             <span>${tDate.toLocaleDateString()}</span>
             <span class="party-actions">
                 ${presentDue > 0 ? `<button class="action-btn pay-btn add-payment-btn" data-id="${t.id}" data-i18n="btn_pay">Pay</button>` : ''}
+                <button class="action-btn add-due-btn" data-id="${t.id}" title="Add More Due">➕ Due</button>
                 <button class="action-btn history-btn view-history-btn" data-id="${t.id}" data-i18n="btn_history">History</button>
                 <button class="action-btn delete-btn delete-party-btn" data-id="${t.id}" title="Delete">🗑️</button>
             </span>
@@ -401,6 +424,9 @@ function renderPartyTransactions(category) {
     // Add event listeners
     document.querySelectorAll('.add-payment-btn').forEach(btn => {
         btn.addEventListener('click', () => openPaymentModal(btn.dataset.id));
+    });
+    document.querySelectorAll('.add-due-btn').forEach(btn => {
+        btn.addEventListener('click', () => openAddMoreDueModal(btn.dataset.id));
     });
     document.querySelectorAll('.view-history-btn').forEach(btn => {
         btn.addEventListener('click', () => openHistoryModal(btn.dataset.id));
@@ -428,6 +454,20 @@ function openPaymentModal(partyId) {
     document.getElementById('payment-party-id').value = partyId;
 
     addPaymentModal.classList.add('show');
+}
+
+// Open Add More Due Modal
+function openAddMoreDueModal(partyId) {
+    const party = partyTransactions.find(t => t.id == partyId);
+    if (!party) return;
+
+    document.getElementById('add-due-party-name').textContent = party.name;
+    document.getElementById('add-due-current').value = `৳${party.due.toFixed(2)}`;
+    document.getElementById('add-due-amount').value = '';
+    document.getElementById('add-due-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('add-due-party-id').value = partyId;
+
+    addMoreDueModal.classList.add('show');
 }
 
 // Open Payment History Modal
@@ -583,6 +623,46 @@ if (cancelPaymentBtn) {
     });
 }
 
+// Add More Due Form
+if (cancelAddDueBtn) {
+    cancelAddDueBtn.addEventListener('click', () => {
+        addMoreDueModal.classList.remove('show');
+    });
+}
+
+if (addMoreDueForm) {
+    addMoreDueForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const partyId = document.getElementById('add-due-party-id').value;
+        const party = partyTransactions.find(t => t.id == partyId);
+        
+        if (party) {
+            const additionalAmount = parseFloat(document.getElementById('add-due-amount').value) || 0;
+            
+            if (additionalAmount <= 0) {
+                alert('Please enter a valid amount greater than 0.');
+                return;
+            }
+            
+            // Update the total due
+            const newTotalDue = party.due + additionalAmount;
+            
+            // Update in Supabase
+            const result = await updatePartyDueInDb(partyId, newTotalDue);
+            
+            if (result.success) {
+                party.due = newTotalDue;
+                savePartyTransactions(); // Backup to localStorage
+                renderPartyTransactions(partyCategoryInput.value);
+                addMoreDueModal.classList.remove('show');
+            } else {
+                alert('Failed to update due amount: ' + result.error);
+            }
+        }
+    });
+}
+
 if (addPaymentForm) {
     addPaymentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -626,6 +706,7 @@ window.addEventListener('click', (e) => {
     if (e.target === partyModal) partyModal.classList.remove('show');
     if (e.target === addPartyTransactionModal) addPartyTransactionModal.classList.remove('show');
     if (e.target === addPaymentModal) addPaymentModal.classList.remove('show');
+    if (e.target === addMoreDueModal) addMoreDueModal.classList.remove('show');
     if (e.target === paymentHistoryModal) paymentHistoryModal.classList.remove('show');
 });
 

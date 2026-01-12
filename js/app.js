@@ -574,7 +574,7 @@ function createMedicineRow(medicine, index) {
     let cells = `
         <td>${index + 1}</td>
         <td>
-            ${medicine.name}
+            <span class="editable-name" data-id="${medicine.id}" title="Click to edit">${medicine.name}</span>
             ${totalStock <= (medicine.lowStockThreshold || 10) ? '<span class="low-stock-dot"></span>' : ''}
         </td>
         <td>${medicine.company}</td>
@@ -632,8 +632,33 @@ function renderMedicines(filter = '', group = 'all') {
         m.company.toLowerCase().includes(filter.toLowerCase())
     );
 
-    // Sort medicines alphabetically by name
-    filteredMedicines.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+    // Sort medicines with special handling for 'fr' numbers
+    filteredMedicines.sort((a, b) => {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        
+        // Check if names end with number + 'fr' pattern (e.g., "18fr", "8fr")
+        const frPatternA = nameA.match(/(\d+)fr$/i);
+        const frPatternB = nameB.match(/(\d+)fr$/i);
+        
+        // Get base names without the fr part
+        const baseNameA = frPatternA ? nameA.substring(0, nameA.length - frPatternA[0].length).trim() : nameA;
+        const baseNameB = frPatternB ? nameB.substring(0, nameB.length - frPatternB[0].length).trim() : nameB;
+        
+        // If base names are the same (same product, different fr sizes)
+        if (baseNameA === baseNameB) {
+            // If both have fr numbers, sort numerically by fr value
+            if (frPatternA && frPatternB) {
+                return parseInt(frPatternA[1]) - parseInt(frPatternB[1]);
+            }
+            // If only one has fr, that comes after
+            if (frPatternA) return 1;
+            if (frPatternB) return -1;
+        }
+        
+        // Otherwise, sort alphabetically
+        return nameA.localeCompare(nameB);
+    });
 
     if (!medicineTableBody) return;
     medicineTableBody.innerHTML = '';
@@ -781,6 +806,54 @@ if (medicineTableBody) {
                 const actionType = e.target.classList.contains('plus') ? 'plus' : 'minus';
                 showAmountModal(actionType, id, shop, med.name);
             }
+        }
+        
+        // Handle medicine name click to edit
+        if (e.target.classList.contains('editable-name')) {
+            const id = parseInt(e.target.dataset.id);
+            const med = medicines.find(m => m.id === id);
+            if (!med) return;
+            
+            const currentName = med.name;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentName;
+            input.className = 'name-edit-input';
+            input.style.cssText = 'width: 100%; padding: 0.3rem; border: 2px solid var(--primary-color); border-radius: 4px; font-size: inherit;';
+            
+            const span = e.target;
+            span.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            const saveEdit = async () => {
+                const newName = input.value.trim();
+                if (newName && newName !== currentName) {
+                    med.name = newName;
+                    await updateMedicineInDb(id, { name: newName });
+                }
+                const newSpan = document.createElement('span');
+                newSpan.className = 'editable-name';
+                newSpan.dataset.id = id;
+                newSpan.title = 'Click to edit';
+                newSpan.textContent = med.name;
+                input.replaceWith(newSpan);
+            };
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    input.blur();
+                } else if (event.key === 'Escape') {
+                    const newSpan = document.createElement('span');
+                    newSpan.className = 'editable-name';
+                    newSpan.dataset.id = id;
+                    newSpan.title = 'Click to edit';
+                    newSpan.textContent = currentName;
+                    input.replaceWith(newSpan);
+                }
+            });
         }
     });
 
