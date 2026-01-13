@@ -50,7 +50,7 @@ body {
 /* Header */
 header {
     --header-height: 72px;
-    position: sticky;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
@@ -297,8 +297,8 @@ select:focus {
     flex-wrap: wrap;
     background-color: var(--card-bg);
     border-bottom: 1px solid var(--card-border);
-    position: sticky;
-    top: var(--header-height);
+    position: fixed;
+    top: 142px;
     left: 0;
     width: 100vw;
     z-index: 2500;
@@ -311,6 +311,7 @@ select:focus {
     padding: 0 1rem 1rem 1rem;
     max-width: 1400px;
     margin: 0 auto;
+    margin-top: 210px;
 }
 
 /* Table Styles */
