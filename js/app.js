@@ -577,7 +577,9 @@ function createMedicineRow(medicine, index) {
             <span class="editable-name" data-id="${medicine.id}" title="Click to edit">${medicine.name}</span>
             ${totalStock <= (medicine.lowStockThreshold || 10) ? '<span class="low-stock-dot"></span>' : ''}
         </td>
-        <td>${medicine.company}</td>
+        <td>
+            <span class="editable-company" data-id="${medicine.id}" title="Click to edit">${medicine.company}</span>
+        </td>
         <td>
             <input type="number" class="price-input" data-id="${medicine.id}" value="${medicine.price}" step="0.01" min="0" style="width: ${Math.max(80, 20 + (String(medicine.price).length * 12))}px">
         </td>
@@ -851,6 +853,54 @@ if (medicineTableBody) {
                     newSpan.dataset.id = id;
                     newSpan.title = 'Click to edit';
                     newSpan.textContent = currentName;
+                    input.replaceWith(newSpan);
+                }
+            });
+        }
+        
+        // Handle company name click to edit
+        if (e.target.classList.contains('editable-company')) {
+            const id = parseInt(e.target.dataset.id);
+            const med = medicines.find(m => m.id === id);
+            if (!med) return;
+            
+            const currentCompany = med.company;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentCompany;
+            input.className = 'company-edit-input';
+            input.style.cssText = 'width: 100%; padding: 0.3rem; border: 2px solid var(--primary-color); border-radius: 4px; font-size: inherit;';
+            
+            const span = e.target;
+            span.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            const saveEdit = async () => {
+                const newCompany = input.value.trim();
+                if (newCompany && newCompany !== currentCompany) {
+                    med.company = newCompany;
+                    await updateMedicineInDb(id, { company: newCompany });
+                }
+                const newSpan = document.createElement('span');
+                newSpan.className = 'editable-company';
+                newSpan.dataset.id = id;
+                newSpan.title = 'Click to edit';
+                newSpan.textContent = med.company;
+                input.replaceWith(newSpan);
+            };
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    input.blur();
+                } else if (event.key === 'Escape') {
+                    const newSpan = document.createElement('span');
+                    newSpan.className = 'editable-company';
+                    newSpan.dataset.id = id;
+                    newSpan.title = 'Click to edit';
+                    newSpan.textContent = currentCompany;
                     input.replaceWith(newSpan);
                 }
             });
@@ -1271,6 +1321,58 @@ if (statsBtn) {
 
         updateStats();
         if (statsModal) statsModal.classList.add('show');
+    });
+}
+
+// Reset Monthly Sales Button
+const resetMonthlySalesBtn = document.getElementById('reset-monthly-sales-btn');
+if (resetMonthlySalesBtn) {
+    resetMonthlySalesBtn.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to reset monthly sales? This will delete all transactions from this month.')) {
+            return;
+        }
+        
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        
+        // Filter transactions to remove current month's 'out' transactions
+        const transactionsToDelete = transactions.filter(t => {
+            const tDate = new Date(t.date);
+            return t.type === 'out' && 
+                   tDate.getMonth() === currentMonth && 
+                   tDate.getFullYear() === currentYear;
+        });
+        
+        // Delete from Supabase
+        try {
+            for (const trans of transactionsToDelete) {
+                await supabaseClient
+                    .from('transactions')
+                    .delete()
+                    .eq('date', trans.date)
+                    .eq('type', 'out')
+                    .eq('quantity', trans.quantity);
+            }
+            
+            // Remove from local array
+            transactions = transactions.filter(t => {
+                const tDate = new Date(t.date);
+                return !(t.type === 'out' && 
+                       tDate.getMonth() === currentMonth && 
+                       tDate.getFullYear() === currentYear);
+            });
+            
+            // Update display
+            const stats = getStats();
+            document.getElementById('stat-monthly-sales').textContent = `৳${stats.monthlySales}`;
+            updateStats();
+            
+            alert('Monthly sales reset successfully!');
+        } catch (err) {
+            console.error('Error resetting monthly sales:', err);
+            alert('Failed to reset monthly sales: ' + err.message);
+        }
     });
 }
 

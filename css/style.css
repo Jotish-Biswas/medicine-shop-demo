@@ -570,6 +570,20 @@ select:focus {
     text-decoration: underline;
 }
 
+/* Editable Company Name */
+.editable-company {
+    cursor: pointer;
+    display: inline-block;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.editable-company:hover {
+    background-color: var(--table-row-hover);
+    text-decoration: underline;
+}
+
 .stock-input::-webkit-outer-spin-button,
 .stock-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
