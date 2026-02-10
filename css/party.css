@@ -1,0 +1,128 @@
+/* Debtor/Creditor Styles - Enhanced Card Design */
+.party-modal-content {
+    max-width: 1200px;
+}
+
+.party-list {
+    max-height: 450px;
+    overflow-y: auto;
+    border: 2px solid var(--card-border);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    background: var(--card-bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Custom scrollbar for party list */
+.party-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.party-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.party-list::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+    opacity: 0.5;
+}
+
+.party-list::-webkit-scrollbar-thumb:hover {
+    opacity: 1;
+}
+
+.party-item {
+    display: grid;
+    grid-template-columns: 3fr 1.5fr 1.5fr 1.5fr 1fr 1.5fr;
+    align-items: center;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--card-border);
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+/* Align numeric columns to the right */
+.party-item span:nth-child(2),
+.party-item span:nth-child(3),
+.party-item span:nth-child(4) {
+    text-align: right;
+    font-weight: 600;
+}
+
+.party-item:last-child {
+    border-bottom: none;
+}
+
+.party-item:hover {
+    background-color: var(--table-row-hover);
+    transform: translateX(4px);
+}
+
+.party-header {
+    font-weight: 700;
+    color: var(--text-color);
+    background: linear-gradient(135deg, var(--table-header-bg) 0%, var(--table-header-bg) 100%);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.party-search-wrapper {
+    flex: 1;
+    min-width: 200px;
+}
+
+.party-search-input {
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    border: 2px solid var(--card-border);
+    border-radius: 10px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.party-search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.1);
+}
+
+.party-search-input:hover {
+    border-color: var(--primary-color);
+}
+
+.party-search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.date-filter-group {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.date-filter-group select {
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    border: 2px solid var(--card-border);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.date-filter-group select:hover {
+    border-color: var(--primary-color);
+}
+
+.date-filter-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.1);
+}
