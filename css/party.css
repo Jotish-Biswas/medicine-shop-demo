@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 /* Debtor/Creditor Styles - Enhanced Card Design */
+=======
+/* Debtor/Creditor Styles */
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 .party-modal-content {
     max-width: 1200px;
 }
 
 .party-list {
+<<<<<<< HEAD
     max-height: 450px;
     overflow-y: auto;
     border: 2px solid var(--card-border);
@@ -30,16 +35,31 @@
 
 .party-list::-webkit-scrollbar-thumb:hover {
     opacity: 1;
+=======
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 .party-item {
     display: grid;
+<<<<<<< HEAD
     grid-template-columns: 3fr 1.5fr 1.5fr 1.5fr 1fr 1.5fr;
     align-items: center;
     padding: 1rem 1.2rem;
     border-bottom: 1px solid var(--card-border);
     gap: 1rem;
     transition: all 0.3s ease;
+=======
+    grid-template-columns: 3fr 1.5fr 1.5fr 1.5fr 1fr 1.5fr; /* Adjusted for 6 columns */
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    gap: 1rem; /* Add gap for spacing */
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 /* Align numeric columns to the right */
@@ -47,7 +67,10 @@
 .party-item span:nth-child(3),
 .party-item span:nth-child(4) {
     text-align: right;
+<<<<<<< HEAD
     font-weight: 600;
+=======
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 .party-item:last-child {
@@ -56,6 +79,7 @@
 
 .party-item:hover {
     background-color: var(--table-row-hover);
+<<<<<<< HEAD
     transform: translateX(4px);
 }
 
@@ -69,6 +93,14 @@
     position: sticky;
     top: 0;
     z-index: 10;
+=======
+}
+
+.party-header {
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: var(--table-header-bg);
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 .party-search-wrapper {
@@ -78,23 +110,37 @@
 
 .party-search-input {
     width: 100%;
+<<<<<<< HEAD
     padding: 0.8rem 1.2rem;
     border: 2px solid var(--card-border);
     border-radius: 10px;
     background-color: var(--input-bg);
     color: var(--text-color);
     font-size: 1rem;
+=======
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-size: 0.95rem;
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
     transition: all 0.3s ease;
 }
 
 .party-search-input:focus {
     outline: none;
+<<<<<<< HEAD
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.1);
 }
 
 .party-search-input:hover {
     border-color: var(--primary-color);
+=======
+    border-color: #008b7b;
+    box-shadow: 0 0 0 3px rgba(0, 139, 123, 0.1);
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 .party-search-input::placeholder {
@@ -103,6 +149,7 @@
 
 .date-filter-group {
     display: flex;
+<<<<<<< HEAD
     gap: 0.6rem;
 }
 
@@ -125,4 +172,15 @@
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.1);
+=======
+    gap: 0.5rem;
+}
+
+.date-filter-group select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--card-border);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }

@@ -70,6 +70,7 @@ header {
     align-items: center;
 }
 
+<<<<<<< HEAD
 .logo-title-group {
     display: flex;
     align-items: center;
@@ -83,6 +84,8 @@ header {
     object-fit: contain;
 }
 
+=======
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 h1 {
     font-size: 1.8rem;
     font-weight: 700;
@@ -319,8 +322,13 @@ select:focus {
 }
 
 /* Main Grid Layout */
+<<<<<<< HEAD
 /* Only product list scrolls, everything else is static */
 #product-list-container {
+=======
+/* Only medicine list scrolls, everything else is static */
+#medicine-list-container {
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
     padding: 0 1rem 1rem 1rem;
     max-width: 1400px;
     margin: 0 auto;
@@ -328,7 +336,11 @@ select:focus {
 }
 
 /* Table Styles */
+<<<<<<< HEAD
 #product-table {
+=======
+#medicine-table {
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -343,8 +355,13 @@ select:focus {
     position: relative;
 }
 
+<<<<<<< HEAD
 #product-table th,
 #product-table td {
+=======
+#medicine-table th,
+#medicine-table td {
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
     padding: 0.75rem;
     text-align: left;
     border-bottom: 1px solid var(--card-border);
@@ -352,13 +369,22 @@ select:focus {
 }
 
 /* Name column - auto width based on content */
+<<<<<<< HEAD
 #product-table td:nth-child(2),
 #product-table th:nth-child(2) {
+=======
+#medicine-table td:nth-child(2),
+#medicine-table th:nth-child(2) {
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
     white-space: nowrap;
 }
 
 /* Table header sticky below quick actions bar */
+<<<<<<< HEAD
 #product-table thead th {
+=======
+#medicine-table thead th {
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
     background-color: #00695C;
     font-weight: 700;
     color: #FFFFFF;
@@ -398,11 +424,19 @@ select:focus {
     padding: 0 1.5rem;
 }
 
+<<<<<<< HEAD
 #product-table tr:last-child td {
     border-bottom: none;
 }
 
 #product-table tbody tr:hover {
+=======
+#medicine-table tr:last-child td {
+    border-bottom: none;
+}
+
+#medicine-table tbody tr:hover {
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
     background-color: var(--table-row-hover);
 }
 
@@ -508,7 +542,11 @@ select:focus {
     margin-left: 0.5rem;
 }
 
+<<<<<<< HEAD
 /* Modal - Modern Card Design */
+=======
+/* Modal */
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 .modal {
     display: none;
     position: fixed;
@@ -518,6 +556,7 @@ select:focus {
     top: 0;
     width: 100%;
     height: 100%;
+<<<<<<< HEAD
     background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);
     align-items: center;
@@ -534,6 +573,11 @@ select:focus {
         opacity: 1;
         backdrop-filter: blur(8px);
     }
+=======
+    background-color: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 .modal.show {
@@ -541,6 +585,7 @@ select:focus {
 }
 
 .modal-content {
+<<<<<<< HEAD
     background: linear-gradient(145deg, var(--card-bg) 0%, var(--card-bg) 100%);
     padding: 2.5rem;
     border-radius: 20px;
@@ -589,6 +634,20 @@ select:focus {
 .modal-content::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
     opacity: 1;
+=======
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 95vh; /* Increased to maximize vertical space */
+    overflow-y: auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 5001; /* ensure modal content is above overlay and other elements */
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 /* Vertical Stock Control */
@@ -653,16 +712,23 @@ select:focus {
     margin: 0;
 }
 
+<<<<<<< HEAD
 /* Amount Modal - Enhanced Design */
 #amount-modal .modal-content {
     text-align: center;
     background: linear-gradient(145deg, var(--card-bg), var(--card-bg));
     max-width: 400px;
+=======
+/* Amount Modal Styles */
+#amount-modal .modal-content {
+    text-align: center;
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 #amount-modal h2 {
     margin-bottom: 1.5rem;
     color: var(--primary-color);
+<<<<<<< HEAD
     font-size: 1.5rem;
     font-weight: 700;
     position: relative;
@@ -679,10 +745,13 @@ select:focus {
     height: 3px;
     background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
     border-radius: 2px;
+=======
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 #amount-modal #amount-input {
     width: 100%;
+<<<<<<< HEAD
     font-size: 2.5rem;
     font-weight: 700;
     padding: 1.2rem;
@@ -702,6 +771,15 @@ select:focus {
         0 0 0 4px rgba(0, 137, 123, 0.1),
         0 8px 20px rgba(0, 137, 123, 0.2);
     transform: scale(1.02);
+=======
+    font-size: 2rem;
+    padding: 1rem;
+    text-align: center;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-color);
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 #amount-modal .form-actions {
@@ -712,6 +790,7 @@ select:focus {
 }
 
 #amount-modal .form-actions button {
+<<<<<<< HEAD
     min-width: 120px;
     padding: 0.9rem 1.8rem;
     font-size: 1.1rem;
@@ -757,6 +836,21 @@ select:focus {
 
 .form-group {
     margin-bottom: 1.2rem;
+=======
+    min-width: 100px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+.modal-content h2 {
+    margin-bottom: 1rem; /* Reduced from 1.5rem */
+    color: var(--text-color);
+    font-size: 1.2rem; /* Reduced font size */
+}
+
+.form-group {
+    margin-bottom: 1rem;
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 .form-row {
@@ -768,7 +862,11 @@ select:focus {
     flex: 1;
 }
 
+<<<<<<< HEAD
 /* Date Select Row for MM/YY - Enhanced */
+=======
+/* Date Select Row for MM/YY */
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 .date-select-row {
     display: flex;
     gap: 0.5rem;
@@ -776,6 +874,7 @@ select:focus {
 
 .date-select-row select {
     flex: 1;
+<<<<<<< HEAD
     padding: 0.9rem;
     border: 2px solid var(--card-border);
     border-radius: 10px;
@@ -794,10 +893,19 @@ select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.1);
+=======
+    padding: 0.8rem;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-size: 0.95rem;
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 label {
     display: block;
+<<<<<<< HEAD
     margin-bottom: 0.6rem;
     font-weight: 600;
     color: var(--text-color);
@@ -832,19 +940,29 @@ label {
 .form-group select:hover,
 .form-group textarea:hover {
     border-color: var(--primary-color);
+=======
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 .form-actions {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
+<<<<<<< HEAD
     margin-top: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--card-border);
+=======
+    margin-top: 1rem; /* Reduced from 1.5rem */
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 .secondary-btn {
     background-color: transparent;
+<<<<<<< HEAD
     border: 2px solid var(--card-border);
     color: var(--text-color);
     padding: 0.85rem 1.8rem;
@@ -908,10 +1026,28 @@ label {
 
 .alerts-list::-webkit-scrollbar-thumb:hover {
     opacity: 1;
+=======
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Alerts List */
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 .alert-item {
     display: flex;
+<<<<<<< HEAD
     flex-direction: column;
     padding: 1rem;
     background: linear-gradient(135deg, var(--low-stock-bg) 0%, var(--low-stock-bg) 100%);
@@ -966,6 +1102,42 @@ label {
     font-weight: 700;
     color: var(--primary-color);
     text-shadow: 0 1px 2px rgba(0, 137, 123, 0.1);
+=======
+    justify-content: space-between;
+    padding: 0.8rem;
+    background-color: var(--low-stock-bg);
+    border-radius: 6px;
+    color: var(--danger-color);
+    font-weight: 500;
+}
+
+/* Stats Grid in Modal */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem; /* Reduced from 1rem */
+    margin-bottom: 1rem; /* Reduced from 1.5rem */
+}
+
+.stat-card {
+    background-color: var(--bg-color);
+    padding: 0.5rem; /* Reduced from 1rem */
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 0.8rem; /* Reduced from 0.9rem */
+    margin-bottom: 0.2rem; /* Reduced from 0.5rem */
+    color: var(--text-secondary);
+}
+
+.stat-value {
+    font-size: 1.1rem; /* Reduced from 1.5rem */
+    font-weight: bold;
+    color: var(--primary-color);
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 }
 
 /* Stock Movement Report Styles */
@@ -1174,6 +1346,7 @@ label {
     color: var(--text-color);
 }
 
+<<<<<<< HEAD
 /* Large Modal - Enhanced Design */
 .modal-lg {
     max-width: 1400px;
@@ -1224,6 +1397,15 @@ label {
     box-shadow: 0 4px 12px rgba(0, 137, 123, 0.3);
     transform: translateY(-2px);
 }
+=======
+/* Large Modal */
+.modal-lg {
+    max-width: 1400px; /* Increased width */
+    width: 98%;
+}
+
+/* Party List Styles */
+>>>>>>> 6b4b8f1516324c4609d8c95daf01eb9d06e8e313
 .party-list {
     margin-top: 1rem;
 }
