@@ -144,7 +144,6 @@ async function loadMedicines() {
                     });
             }
 
-
             return {
                 id: med.id,
                 name: med.name,
@@ -770,7 +769,7 @@ if (amountForm) {
             alert("Please enter a valid positive number.");
             return;
         }
-
+        
         if (actionType === 'plus') {
             med.stock[shop] = (med.stock[shop] || 0) + amount;
             logTransaction('in', amount, med.price, shop, med.name, med.id, med.stock[shop]);
@@ -1523,7 +1522,7 @@ if (downloadPdfBtn) {
                         doc.text(outQty, 130, yPos);
                         doc.setTextColor(0, 0, 0);
                         doc.text(String(stockValue), 155, yPos);
-
+                        
                         yPos += 7;
                     });
                     
