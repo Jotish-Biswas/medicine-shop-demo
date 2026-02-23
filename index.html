@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Niloy Surgical</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/party.css">
     <!-- Supabase SDK -->
@@ -19,10 +18,7 @@
 <body>
     <header>
         <div class="header-top">
-            <div class="logo-title-group">
-                <img src="logo.jpeg" alt="Company Logo" class="company-logo" id="company-logo" onerror="this.style.display='none'" style="display: none;">
-                <h1 data-i18n="app_title" id="app-title">Niloy Surgical</h1>
-            </div>
+            <h1 data-i18n="app_title">Niloy Surgical</h1>
             <div class="controls">
                 <button id="alert-btn" class="icon-btn" aria-label="Alerts" style="width: auto; padding-right: 1rem;">
                     ⚠️ <span data-i18n="alerts_btn" style="margin-left: 0.5rem; font-size: 0.9rem;">Alerts</span>
@@ -550,24 +546,5 @@
     <script src="js/lang.js"></script>
     <script src="js/app.js"></script>
     <script src="js/party.js"></script>
-    <script>
-        // Check if logo exists and show it, hide title if logo loads
-        window.addEventListener('load', function() {
-            const logo = document.getElementById('company-logo');
-            const title = document.getElementById('app-title');
-            if (logo) {
-                const img = new Image();
-                img.onload = function() {
-                    logo.style.display = 'block';
-                    if (title) title.style.display = 'none'; // Hide title when logo loads
-                };
-                img.onerror = function() {
-                    logo.style.display = 'none';
-                    if (title) title.style.display = 'block'; // Show title if logo fails
-                };
-                img.src = logo.src;
-            }
-        });
-    </script>
 </body>
 </html>
